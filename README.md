@@ -2347,206 +2347,126 @@ public class PaymentService {
 ![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 
 
-## ServiceCenterInquiry.jsx 컴포넌트
+## 메인 페이지 팝업창
 
-※ 상담문의 페이지 (첫화면, 검색 후 화면)
+※ EventModal.jsx
 ```javascript
 
-const df = (date) => moment(date).format("YYYY-MM-DD HH:mm");
+const Container = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+`;
 
-const ServiceCenterInquiry = () => {
-    const nav = useNavigate();
-    let pnum = sessionStorage.getItem("pageNum");
+const ModalBackground = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+`;
 
-    const [bitem, setBitem] = useState({});
-    const [page, setPage] = useState({
-      totalPage: 0,
-      pageNum: 1,
-    });
+const ModalContainer = styled.div`
+  z-index: 1001;
+`;
+
+const ModalContent = styled.div`
+  width: 30vw;
+  height: 35vw;
+  margin: 0 100%;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background-image: url(${(props)=>(props.eData ? "upload/"+props.eData : "upload/"+props.eData)});
+  background-size: 30vw 35vw;
+  background-repeat: no-repeat;
+  background-position: center center;
+`;
+
+const ModalCloseWrapper = styled.div`
+    width:100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 100%;
+  p, label {
+    cursor: pointer;
+    color: white;
+  },
+  input {
+    margin-right:5px
+  }
+`;
+
+const EventModal = ({closeModal, closeModalUntilExpires, eData}) => {
+  console.log(eData[0]);
+  return (
+    <Container>
+      <ModalBackground />
+      <ModalContainer>
+        <ModalContent eData={eData[0]?.eimg}>
+        </ModalContent>
+        <ModalCloseWrapper>
+          <label><input type={"checkBox"} onClick={closeModalUntilExpires}/>오늘 하루 더 이상 보지 않기</label>
+          <p onClick={closeModal}>닫기 x</p>
+        </ModalCloseWrapper>
+      </ModalContainer>
+    </Container>
+  );
+}
+
+export default EventModal;
+```
+※ EventModalControll.jsx
+```javascript
+
+export default () => {
+  const [eData, setEdata]= useState([]);
+  useEffect(()=>{
+    axios.get("/eventGet").then((res)=>{console.log(res); setEdata(res.data)}).catch(err=>console.log(err));
+  },[])
+  console.log(eData);
+  const [openModal, setOpenModal] = useState(true);
+  const [hasCookie, setHasCookie] = useState(true);
+  const [appCookies, setAppCookies] = useCookies(); 
+
+  const getExpiredDate = (days) => {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date;
+  };
+
+  const closeModalUntilExpires = () => {
+    if (!appCookies) return;
+
+    const expires = getExpiredDate(1);
+    setAppCookies("MODAL_EXPIRES", true, { path: "/", expires });
+
+    setOpenModal(false);
+  };
+
+  useEffect(() => {
+    if (appCookies["MODAL_EXPIRES"]) return;
+    console.log(appCookies["MODAL_EXPIRES"]);
+    setHasCookie(false);
+  }, []);
   
-    //게시글 목록을 서버로부터 가져오는 함수
-    let search
 
-    const getList = (pnum) => {
-        search = sessionStorage.getItem('search')
-        console.log(search);
-
-        axios
-        .get("/ServiceList", { params: { pageNum: pnum, content : search, type: "serviceCenter" } })
-        .then((res) => {
-            setInput1("");
-
-            console.log(res.data);
-            const { bList, totalPage, pageNum } = res.data;
-            setPage({ totalPage: totalPage, pageNum: pageNum });
-            //console.log(totalPage);
-            setBitem(bList);
-            sessionStorage.setItem("pageNum", pageNum);
-            // sessionStorage.setItem('pageNum', 1)
-
-        })
-        .catch((err) => console.log(err));
-    };
-
-    const getBoard = useCallback((bno) => {
-        //보여질 게시글 번호를 localStorage에 저장(글번호 유지를 위해)
-
-        let grade = sessionStorage.getItem("grade");
-
-        if(grade != "admin"){
-            let sign = prompt("게시글 비밀번호를 입력해주세요");
-
-            const abc = {
-                bno : bno,
-                bpwd : sign,
-            }
-    
-            if(sign !== null){
-                console.log(abc);
-                axios
-                .post("SboardPwd", abc)
-                .then((res) => {
-                    console.log(res.data);
-    
-                    if(res.data === "일치"){
-                        localStorage.setItem("bno", bno);
-                        nav("/ServiceCenterDetail");
-                    }else {
-                        alert("다시 입력해주세요.");
-                    }
-                })
-                .catch((err) => console.log(err));
-            }
-        }else {
-            localStorage.setItem("bno", bno);
-            nav("/ServiceCenterDetail");
-        }
-
-    }, []);
-
-    //main 페이지가 화면에 보일 때 서버로부터 게시글 목록을 가져온다.
-    useEffect(() => {
-        sessionStorage.setItem('search', '')
-        pnum !== null ? getList(pnum) : getList(1);
-    } ,[]);
-
-    //출력할 게시글 목록 작성
-    let list = null;
-    if (bitem.length === 0) {
-        list = (
-        <StableRow key={0}>
-            <StableColumn span={4}>게시글이 없습니다.</StableColumn>
-        </StableRow>
-        );
-    } else {
-        list = Object.values(bitem).map((item,i) => (
-        <StableRow key={item.bno}>
-            {/* <StableColumn wd="w-10">{bitem.length-i}</StableColumn> */}
-            <StableColumn wd="w-10">{(pnum - 1) * 10 + i+1}</StableColumn>
-            <StableColumn wd="w-55">
-            <div onClick={() => getBoard(item.bno)}>{item.btitle}&ensp;🔒</div>
-            </StableColumn>
-            <StableColumn wd="w-15">{item.bmid}</StableColumn>
-            <StableColumn wd="w-20">{df(item.bdate)}</StableColumn>
-        </StableRow>
-        ));
-    }
-
-    const write = (e) => {
-        e.preventDefault();
-
-        const mid = sessionStorage.getItem("mid");
-
-        if(mid === null){
-            alert("로그인 후 가능한 기능입니다");
-            return;
-        }else{
-            nav("/ServiceCenterWrite");
-        }
-
-    }
-
-    const [input1, setInput1] = useState("");
-
-    const onch = (e) => {
-        setInput1(e.target.value);
-        sessionStorage.setItem('search', e.target.value);
-    };
-
-    return (
-        <div data-aos="fade-up">
-            <Section title="상담문의게시판" style={{ height : "1000px"}}>
-                <Stable hName={["NO", "제목", "작성자", "작성일"]}>{list}</Stable>
-                <Paging page={page} getList={getList} />
-                <div style={dv} >
-                    <input style={input} onChange={onch} value={input1}/>
-                    <Button style={searchBtn} onClick={() => getList(pnum, search)}>검색</Button>
-                    <Button style={writeBtn} onClick={write}>글쓰기</Button>
-                </div>
-            </Section>
-        </div>
-    );
-}; 
-export default ServiceCenterInquiry;
+  return (
+    <div>
+      {openModal && !hasCookie && <EventModal closeModal={() => setOpenModal(false)} closeModalUntilExpires={closeModalUntilExpires} eData={eData} />}
+    </div>
+  );
+}
 ```
-- #### 첫 페이지 화면<br>
-페이지에 들어가자마자 게시글 목록을 서버로부터 map함수를 이용해 가져와 출력합니다. 페이징 처리도 같이 합니다.
-- #### 글 제목 검색 후 화면<br>
-게시글의 제목 중, 검색 input 창 안의 내용이 포함 되어있는 게시글만 가져와 출력합니다. 페이징 처리도 같이 합니다.
 
-## Back_BoardController
-```java
-    @GetMapping("ServiceList")
-    public Map<String, Object> ServiceList(@RequestParam Integer pageNum, String content, String type, HttpSession session){
-        log.info("ServiceList()");
-        return bServ.getServiceList(pageNum,content,type);
-    }
-```
-## Back_BoardService
-```java
-        public Map<String, Object> getServiceList(Integer pageNum, String content, String type) {
-        log.info("getServiceList()");
-
-        if(pageNum == null){//처음에 접속했을 때는 pageNum이 넘어오지 않는다.
-            pageNum = 1;
-        }
-
-        int listCnt = 10; // 페이지당 보여질 게시글 갯수
-
-        Map<String, Object> res = new HashMap<>();
-
-        if(content.equals("")) {
-            Pageable pb = PageRequest.of((pageNum - 1), listCnt, Sort.Direction.DESC, "bno");
-            Page<Board> result = bRepo.findByBtype(type, pb);
-            List<Board> bList = result.getContent();
-            int totalPage = result.getTotalPages();
-
-            res.put("bList", bList);
-            res.put("pageNum", pageNum);
-            res.put("totalPage", totalPage);
-        }else{
-            Pageable pb = PageRequest.of((pageNum - 1), listCnt, Sort.Direction.DESC,"bno");
-            Page<Board> board = bRepo.findByBtitleContainingAndBtype(content, type, pb);
-            List<Board> bList = board.getContent();
-            int totalPage = board.getTotalPages();
-
-            res.put("totalPage", totalPage);
-            res.put("pageNum", pageNum);
-            res.put("bList", bList);
-        }
-        return res;
-    }
-```
-- #### 첫 페이지 화면<br>
-처음 접속 시에만 임의로 pageNum에 1을 줘 1페이지로 이동하게 합니다. 프론트에서 넘겨준 값과 일치한 게시글들만 DESC(내림차순)으로 반환합니다.
-- #### 글 제목 검색 후 화면<br>
-findBy~~Containing을 이용해 프론트에서 넘겨준 값이 포함되어있는 게시글들만 DESC(내림차순)으로 반환합니다.<br>
-
-#### 첫 화면<br>
-![image](https://user-images.githubusercontent.com/117874997/215291950-f4a5b511-081f-4eda-bf61-ab81259ec376.png)
-
-#### 글 제목 검색 후 화면<br>
-![image](https://user-images.githubusercontent.com/117874997/215291978-37bc474b-55c2-4e9f-bcba-6fa26bb15acc.png)
+- #### 메인 페이지 화면<br>
+페이지에 들어가자마자 팝업창을 띄워줍니다. '오늘 하루 보지 않기' 버튼을 클릭했을때 쿠키를 사용해서 더 이상 팝업창이 뜨지 않도록 설정해주었습니다.
 
 ## ServiceCenterWrite.jsx 컴포넌트
 
