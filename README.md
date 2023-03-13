@@ -920,9 +920,7 @@ log.info(hseoul+"이거왜안되지?");
 }
 ```
 
----jpa
-
-public interface SDMRepository extends CrudRepository<SDM, Integer> {
+    {
     SDM findBySidx(int sidx);
 
     @Query("SELECT s FROM SDM s WHERE (s.slocation Like %?1% or s.slocation Like %?2% or s.slocation Like %?3% or s.slocation Like %?4% or s.slocation Like %?5% or s.slocation Like %?6% or s.slocation Like %?7% or s.slocation Like %?8% or s.slocation Like %?9% or s.slocation Like %?10% or s.slocation Like %?11% or s.slocation Like %?12% or s.slocation Like %?13% or s.slocation Like %?14% or s.slocation Like %?15% or s.slocation Like %?16%) And (s.sprice between ?17 and ?18)")
@@ -944,7 +942,7 @@ public interface SDMRepository extends CrudRepository<SDM, Integer> {
 }
 
 
-public interface ReservationRepository extends CrudRepository<Reservations, String> {
+    {
     List<Reservations> findByRmid(String rmid);
 
     @Query("Select rwh from Reservations rwh where( rwh.rdate=?1 and rwh.rtype='웨딩홀' )")
@@ -980,7 +978,6 @@ public interface ReservationRepository extends CrudRepository<Reservations, Stri
 
     Page<Reservations> findByRidxGreaterThan(int i, Pageable pb);
 }
----
 
 프론트에서 받아온 값을 매개변수로 받고 repository에서 쿼리문을 사용해 만든 함수 findByRsdate, findBySSlocation 등으로 데이터베이스에 일치하는 데이터를 가져온 후 데이터들을 카테고리별로 list에 담고 각 리스트들을 map에 담아서 return 합니다.<br><br>
 - #### 로그인 창 활성화 화면<br><br>
