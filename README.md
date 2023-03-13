@@ -699,7 +699,7 @@ export default (props) => {
     }
     //searchEstimate end
 ```
-## Back_MemberService
+## Back_EstimateService
 ```java
 @Service
 @Log
@@ -980,375 +980,1371 @@ log.info(hseoul+"이거왜안되지?");
 }
 
 프론트에서 받아온 값을 매개변수로 받고 repository에서 쿼리문을 사용해 만든 함수 findByRsdate, findBySSlocation 등으로 데이터베이스에 일치하는 데이터를 가져온 후 데이터들을 카테고리별로 list에 담고 각 리스트들을 map에 담아서 return 합니다.<br><br>
-- #### 로그인 창 활성화 화면<br><br>
+- #### 검색 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215289298-3d6edfe0-1d41-482c-ae87-c0a95a150ed9.png)
 
-## Header.jsx 컴포넌트 (부분)
+## EstimateItem.jsx 컴포넌트 (부분)
 
-※ 로그인 회원(일반, 소셜(네이버,구글), 관리자)에 따라 다른 구성 
+※ 로그인 회원, 비회원에 따라 다른 구성 
 
 ```javascript
-{lstate === "" ? (  
-        <FlexBox gap={15} align="center">
-          <UtilText onClick={openModal}>로그인</UtilText>
-          <UtilText onClick={()=>setMymodal(true)} >회원가입 </UtilText>
-        </FlexBox>
-      ) : (manager === "admin" ? (
-        <FlexBox gap={15} align="center">
-          <UtilText>{manager}님</UtilText>
-          <UtilText onClick={managerPage}>관리자 페이지</UtilText>
-          <UtilText onClick={onLogout}>로그아웃</UtilText>
-        </FlexBox>
-      ) : (naverState !== "" ? (
-        <FlexBox gap={15} align="center">
-          <UtilText onClick={() => {alert(`🤗 ${naverState}님 반갑습니다 🤗`)}}><img src={naverLogo} alt="naver" style={{marginTop:"7px", width:"30px"}}/></UtilText>
-          <UtilText onClick={Mypage}>{naverState}님</UtilText>
-          <UtilText onClick={onLogout2}>로그아웃</UtilText>
-        </FlexBox>
-      ) : (googleState !== "" ? (
-        <FlexBox gap={15} align="center">
-          <UtilText onClick={() => {alert(`🤗 ${googleState}님 반갑습니다 🤗`)}}><img src={googleLogo} alt="google" style={{marginTop:"9px", width:"40px", marginRight:"-5px"}}/></UtilText>
-          <UtilText onClick={Mypage}>{googleState}님</UtilText>
-          <UtilText onClick={onLogout2}>로그아웃</UtilText>
-        </FlexBox>
-      ) : (
-        <FlexBox gap={15} align="center">
-          <UtilText>{lstate}님</UtilText>
-          <UtilText onClick={Mypage}>마이페이지</UtilText>
-          <UtilText onClick={onLogout}>로그아웃</UtilText>
-        </FlexBox>
-      ))))}
-```
+const EstimateItem = ( {pboxp,setPboxp,w,s,p,h, ...props} ) => {
+  const comma = (num) =>[num].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const id = sessionStorage.getItem("mid");
+  const nextId = useRef(0);
+  const [a, setA]= useState(false);
+  const [tbox, setTbox]= useState(0);
+  const clickTbox =()=>{setTbox(1)};
+  const clickTbox2 = () => {setTbox(0);}
+  // && pboxp.wprice!=w[e.target.id.substr(1)].whprice
+  const dibBtn= () => {
+    // axios.post("/ddibInsert" , null, {params:{dibData:encodeURI(dibData)}})
+    axios.post("/ddibInsert" ,dibData)
+    .then((res)=>{
+      window.alert("찜딱콩");
+      setA(false);
+      setDibData([]);
+    }).catch(err=>{setA(false);setDibData([]);});
+  }
+  const clickwItem = (e) => {
+    if(id===undefined || id===null || id===""){
+      window.alert("로그인 후 이용 가능한 서비스입니다.");
+      return;
+    }
+    
+    if(e.target.type==="submit"){
+      let btnconfirm= window.confirm("찜하시겠습니까?");
+      console.log(btnconfirm);
+      if(btnconfirm===false){
+        return;
+      }
+      else if(btnconfirm===true){
+        setDibData([...dibData,{id:nextId.current ,dtype:"웨딩홀", dmid:id, dwhidx:w[e.target.id.substr(1)]?.whidx}]);
+      }
+      console.log(dibData);
+      console.log(pboxp);
+      setA(true);
+      return;
+    }
 
-- #### 일반회원 로그인 후 화면<br><br>
+    const wc = document.getElementById("w"+e.target.id.substr(1));
+    console.log("쫌"+wc.checked);
+    console.log(w[e.target.id.substr(1)]);
+      if(wc.checked==false){
+      e.target.style.opacity=0.1;
+        setPboxp({...pboxp, wprice:pboxp.wprice+w[e.target.id.substr(1)].whprice});
+        setDibData([...dibData,{id:nextId.current ,dtype:"웨딩홀", dmid:id, dwhidx:w[e.target.id.substr(1)].whidx}]);
+        console.log(dibData);
+      }else{
+        e.target.style.opacity=0;
+        setPboxp({...pboxp, wprice:pboxp.wprice-w[e.target.id.substr(1)].whprice});
+        for(let i=0; i<dibData.length; i=i+1){
+        setDibData(dibData.filter(dibData => dibData.dwhidx!==w[e.target.id.substr(1)].whidx ));
+        }
+        console.log(dibData);
+      }
+
+  }
+  
+  const clicksItem = (e) => {
+    if(id===undefined || id===null || id===""){
+      window.alert("로그인 후 이용 가능한 서비스입니다.");
+      return;
+    }
+    
+    if(e.target.type==="submit"){
+      let btnconfirm= window.confirm("찜하시겠습니까?");
+      console.log(btnconfirm);
+      if(btnconfirm===false){
+        return;
+      }else if(btnconfirm===true){
+        setDibData([...dibData,{id:nextId.current ,dtype:"스드메", dmid:id, dsidx:s[e.target.id.substr(1)].sidx}]);
+      }
+      console.log(dibData);
+      console.log(pboxp);
+      setA(true);
+      return;
+    }
+
+
+    const sc = document.getElementById("sd"+e.target.id.substr(1));
+    console.log(e);
+    console.log("sc1 체크여부 :"+sc.checked+"아이디: s"+e.target.id.substr(1));
+    if(sc.checked==false){
+      e.target.style.opacity=0.1;
+        setPboxp({...pboxp, sprice:pboxp.sprice+s[e.target.id.substr(1)].sprice});
+        setDibData([...dibData,{id:nextId.current ,dtype:"스드메", dmid:id, dsidx:s[e.target.id.substr(1)].sidx}]);
+    }else{
+      e.target.style.opacity=0;
+        setPboxp({...pboxp, sprice:pboxp.sprice-s[e.target.id.substr(1)].sprice});
+        for(let i=0; i<dibData.length; i=i+1){
+          setDibData(dibData.filter(dibData => dibData.dsidx!==s[e.target.id.substr(1)].sidx ));
+          }
+    }
+  }
+
+  const clickpItem = (e) => {
+    if(id===undefined || id===null || id===""){
+      window.alert("로그인 후 이용 가능한 서비스입니다.");
+      return;
+    }
+    
+    if(e.target.type==="submit"){
+      let btnconfirm= window.confirm("찜하시겠습니까?");
+      console.log(btnconfirm);
+      if(btnconfirm===false){
+        return;
+      }else if(btnconfirm===true){
+        setDibData([...dibData,{id:nextId.current ,dtype:"플래너", dmid:id, dpidx:p[e.target.id.substr(1)].pidx}]);
+      }
+      console.log(dibData);
+      console.log(pboxp);
+      setA(true);
+      return;
+    }
+
+
+    const pc = document.getElementById("pd"+e.target.id.substr(1));
+    console.log("pcpc"+e.target.id.substr(1))
+    console.log("pc1 체크여부 :"+pc.checked+"아이디: pd"+e.target.id.substr(1))
+    if(pc.checked==false){
+      e.target.style.opacity=0.1;
+        setPboxp({...pboxp, pprice:pboxp.pprice+p[e.target.id.substr(1)].pprice});
+        setDibData([...dibData,{id:nextId.current ,dtype:"플래너", dmid:id, dpidx:p[e.target.id.substr(1)].pidx}]);
+    }else{
+      e.target.style.opacity=0;
+        setPboxp({...pboxp, pprice:pboxp.pprice-p[e.target.id.substr(1)].pprice});
+        for(let i=0; i<dibData.length; i=i+1){
+          setDibData(dibData.filter(dibData => dibData.dpidx!==p[e.target.id.substr(1)].pidx ));
+        }
+    }
+  }
+
+  const clickhItem = (e) => {
+    if(id===undefined || id===null || id===""){
+      window.alert("로그인 후 이용 가능한 서비스입니다.");
+      return;
+    }
+    
+    if(e.target.type==="submit"){
+      let btnconfirm= window.confirm("찜하시겠습니까?");
+      console.log(btnconfirm);
+      if(btnconfirm===false){
+        return;
+      }else if(btnconfirm===true){
+        setDibData([...dibData,{id:nextId.current ,dtype:"허니문", dmid:id, dhidx:h[e.target.id.substr(1)].hidx}]);
+      }
+      console.log(dibData);
+      console.log(pboxp);
+      setA(true);
+      return;
+    }
+
+
+    const hc = document.getElementById("ho"+e.target.id.substr(1));
+    if(hc.checked==false){
+      e.target.style.opacity=0.1;
+        setPboxp({...pboxp, hprice:pboxp.hprice+h[e.target.id.substr(1)].hcost});
+        setDibData([...dibData,{id:nextId.current ,dtype:"허니문", dmid:id, dhidx:h[e.target.id.substr(1)].hidx}]);
+    }else{
+        e.target.style.opacity=0;
+        setPboxp({...pboxp, hprice:pboxp.hprice-h[e.target.id.substr(1)].hcost});
+        for(let i=0; i<dibData.length; i=i+1){
+          setDibData(dibData.filter(dibData => dibData.dhidx!==h[e.target.id.substr(1)].hidx ));
+        }
+    }
+  }
+  const wItem = w?.map((wlist,a) => {
+    return (
+      <div data-aos="fade-up" style={{ }}>
+      <FlexBox style={{width:"100%"}}>
+      <div
+      style={{
+        width: '1395px',
+        height: '550px',
+        backgroundImage: `url(upload/${wlist.whimg2})`,
+        backgroundSize: '1395px 550px',
+        borderRadius: "7px"
+      }}/>
+      <div className='ehover' onClick={() => window.open('/collect/wedding-hall/', '_blank')}>{wlist.whstr}</div>
+      </FlexBox>
+      { pboxp.wprice !== 0 ?
+      <><input type="checkBox" id={"w"+a} style={{display:"none"}}/><label htmlFor={'w'+a} id={"a"+a} className='pcheck' onClick={(e)=>clickwItem(e)}></label></>:<><input type="checkBox" checked={false} id={'w'+a} style={{display:"none"}}/><label htmlFor={'w'+a} id={"a"+a} className='pcheck' style={{opacity:0}} onClick={(e)=>clickwItem(e)}></label></>}
+    <p style={{ marginTop: 10, marginBottom: "50px"}}>
+      <Typhography size="md" font="medium" style={{display:"inline-block", width:"100%", padding:"20px 10px 25px 20px", borderBottom:"1px dotted lightGray"}}>
+        <span key={a} style={{fontSize:"25px", fontWeight:'bold'}}>{wlist.whname}</span>
+        <div style={{float:"right"}}>
+        <span style={{fontSize:"25px", fontWeight:'bold', lineHeight:"65px", marginRight:"100px"}}>{comma(wlist.whprice)}만원</span>
+          <Payment ptext={"예약하기💕"} width={"120px"} height={"100px"} wlist={wlist} background ={'#C3B6D9'} borderRadius={'10px'}></Payment>
+          <Button id={"w"+a} onClick={(e)=>{clickwItem(e)}} style={{width:120, height:100, background:"lightgray", borderRadius:'10px', marginLeft:'10px'}}>찜하기💕</Button>
+        </div>
+        <span style={{fontSize:"20px", fontWeight:'bold', lineHeight:"40px"}}><br/>{wlist.whkind}</span>
+      </Typhography>
+    </p>
+    </div>);
+  })
+  console.log(w);
+  const sItem = s?.map((slist,b) => {
+    return (
+      <div data-aos="fade-up" style={{}}>
+      <FlexBox style={{width:"700px" }}>
+      <div
+      style={{
+        width: '650px',
+        height: '350px',
+        backgroundImage: `url(upload/${slist.simg2})`,
+        backgroundSize: '650px 350px',
+        borderRadius: "7px"
+      }}/>
+      <div className='ehover2' onClick={() => window.open('/collect/sdm/', '_blank')}>{slist.sstr}</div>
+      </FlexBox>
+      { pboxp.sprice !== 0 ?
+      <><input type="checkbox" id={"sd"+b} style={{display:"none"}}/><label htmlFor={'sd'+b} id={"b"+b} className='ppcheck' onClick={(e)=>clicksItem(e)}></label></>:<><input type="checkbox" checked={false} id={"sd"+b} style={{display:"none"}}/><label htmlFor={"sd"+b} id={"b"+b} className='ppcheck' style={{}} onClick={(e)=>clicksItem(e)}></label></>}
+    <p style={{ marginTop: 10, marginBottom: "50px" }}>
+      <Typhography size="md" font="medium" style={{display:"inline-block", width:"92%", padding:"10px 0px 15px 20px", borderBottom:"1px dotted lightGray"}}>
+        <span key={b} style={{fontSize:"23px", fontWeight:'bold'}}>{slist.scomp}</span>
+        <div style={{float:"right"}}>
+        <span style={{fontSize:"23px", fontWeight:'bold', lineHeight:"55px", marginRight:"10px"}}>{comma(slist.sprice)}만원</span>
+          <Payment ptext={"예약하기💕"} width={"120px"} height={"100px"} slist={slist} background ={'#C3B6D9'} borderRadius={'10px'}></Payment>
+          <Button id={"b"+b}  onClick={(e)=>{clicksItem(e)}} style={{width:120, height:100, background:"lightgray", borderRadius:'10px', marginLeft:'10px'}}>찜하기💕</Button>
+        </div>
+        <span style={{fontSize:"19px", fontWeight:'bold', lineHeight:"40px"}}><br/>{slist.slocation}</span>
+      </Typhography>
+    </p>
+    </div>);
+  })
+  
+  const pItem = p?.map((plist,c) => {
+    return (
+      <div data-aos="fade-up" style={{ }}>
+      <FlexBox style={{width:"700px"}}>
+      <div
+      style={{
+        width: '650px',
+        height: '600px',
+        backgroundImage: `url(upload/${plist.pimg})`,
+        backgroundSize: '650px 600px',
+        borderRadius: "7px"
+      }}/>
+      <div className='ehover3' onClick={() => window.open('/collect/honeymoon/', '_blank')}>{plist.pstr}</div>
+      </FlexBox>
+      { pboxp.pprice !==0 ?
+     <><input type="checkbox" id={"pd"+c} style={{display:"none"}}/><label htmlFor={'pd'+c} id={"c"+c} className='ppcheck' onClick={(e)=>clickpItem(e)}></label></>:<><input type="checkbox" checked={false} id={"pd"+c} style={{display:"none"}}/><label htmlFor={"pd"+c} id={"c"+c} className='ppcheck' style={{opacity:0}} onClick={(e)=>clickpItem(e)}></label></>}
+    <p style={{ marginTop: 10, marginBottom: "50px" }}>
+      <Typhography size="md" font="medium" style={{display:"inline-block", width:"92%", padding:"10px 0px 15px 20px", borderBottom:"1px dotted lightGray"}}>
+        <span key={c} style={{fontSize:"23px", fontWeight:'bold'}}>{plist.pname}</span>
+        <div style={{float:"right"}}>
+          <span style={{fontSize:"23px", fontWeight:'bold', lineHeight:"55px", marginRight:"10px"}}>{comma(plist.pprice)}만원</span>
+          <Payment ptext={"예약하기💕"} width={"120px"} height={"100px"} plist={plist} background ={'#C3B6D9'} borderRadius={'10px'}></Payment>
+          <Button  onClick={(e)=>{clickpItem(e)}} id={"c"+c} style={{width:120, height:100, background:"lightgray", borderRadius:'10px', marginLeft:'10px'}}>찜하기💕</Button>
+        </div>
+        <span style={{fontSize:"19px", fontWeight:'bold', lineHeight:"40px"}}><br/>{plist.pphone}</span>
+      </Typhography>
+    </p>
+    </div>);
+  })
+  const hItem = h?.map((hlist,d) => {
+    console.log(d);
+    console.log(`url(upload/${hlist.himg})`);
+    return (
+      <div data-aos="fade-up" style={{ }}>
+      <FlexBox style={{width:"100%"}}>
+      <div
+      style={{
+        width: '1395px',
+        height: '550px',
+        backgroundImage: `url('upload/${hlist.himg2}')`,
+        backgroundSize: '1395px 550px',
+        backgroundRepeat : "no-repeat",
+        borderRadius: "7px"
+      }} />
+      <div className='ehover' style={{overflow:"hidden"}} onClick={() => window.open('/collect/honeymoon/', '_blank')}>{hlist.hstr}</div>
+      </FlexBox>
+      { pboxp.hprice !=0 ?
+       <><input type="checkBox" id={"ho"+d} style={{display:"none"}}/><label htmlFor={'ho'+d} id={"d"+d} className='pcheck' onClick={(e)=>clickhItem(e)}></label></>:<><input type="checkBox" checked={false} id={'ho'+d} style={{display:"none"}}/><label htmlFor={'ho'+d} id={"d"+d} className='pcheck' style={{opacity:0}} onClick={(e)=>clickhItem(e)}></label></>}
+    <p style={{ marginTop: 10, marginBottom: "50px" }}>
+      <Typhography size="md" font="medium" style={{display:"inline-block", width:"100%", padding:"20px 10px 25px 20px", borderBottom:"1px dotted lightGray"}}>
+        <span key={d} style={{fontSize:"25px", fontWeight:'bold'}}>{hlist.hlocation}</span>
+        <div style={{float:"right"}}>
+        <span style={{fontSize:"25px", fontWeight:'bold', lineHeight:"65px", marginRight:"100px"}}>{comma(hlist.hcost)}만원</span>
+          <Payment ptext={"예약하기💕"} width={"120px"} height={"100px"} hlist={hlist} background ={'#C3B6D9'} borderRadius={'10px'}></Payment>
+          <Button  onClick={(e)=>{clickhItem(e)}} id={"d"+d} style={{width:120, height:100, background:"lightgray", borderRadius:'10px', marginLeft:'10px'}}>찜하기💕</Button>
+        </div>
+        <span style={{fontSize:"20px", fontWeight:'bold', lineHeight:"40px"}}><br/>{hlist.hbrand}</span>
+      </Typhography>
+    </p>
+    </div>);
+  })
+
+  console.log("스드메"+sItem);
+  console.log(pItem);
+  console.log("허니문"+hItem);
+
+  const [dibData, setDibData] = useState([]);
+  console.log("")
+  useEffect(()=> {
+    console.log(dibData);
+  },[dibData])
+
+  useEffect(()=>{
+    console.log(dibData);
+    if(a===true){
+      dibBtn();
+    }
+  },[a])
+
+
+  return (
+    <div style={{marginBottom:80, marginTop:70}}>
+      {(wItem !== undefined && wItem?.length!==0) ? 
+      <>
+      <h1 style={{marginTop:"-50px",marginBottom:"40px", marginLeft:"10px"}}>웨딩홀</h1> 
+      <div style={{marginBottom:"80px", display:"flex", flexWrap:"wrap"}}>{wItem}</div></>: null }
+      {(sItem !== undefined && sItem?.length!==0) ?
+      <>
+      <h1 style={{marginTop:"-50px",marginBottom:"40px", marginLeft:"10px"}}>스드메</h1> 
+      <div style={{marginBottom:"80px", display:"flex", flexWrap:"wrap"}}>{sItem}</div></>: null }
+      {pItem !== undefined && pItem?.length!==0 ? 
+      <>
+      <h1 style={{marginBottom:"40px", marginLeft:"10px"}}>플래너</h1>
+      <div style={{marginBottom:"80px", display:"flex", flexWrap:"wrap"}}>{pItem}</div></>: null }
+      {hItem !== undefined && hItem?.length!==0 ? 
+      <>
+      <h1 style={{marginBottom:"40px", marginLeft:"10px"}}>허니문</h1>
+      <div style={{marginBottom:"80px", display:"flex", flexWrap:"wrap"}}>{hItem}</div></>: null }
+      { pboxp.wprice+pboxp.sprice+pboxp.pprice+pboxp.hprice != 0 ?  <>
+        {tbox == 0 ? 
+        <div id="pricebox" style={{background:"rgb(255, 252, 253)", opacity:"1" ,color:"black" ,height:365, width:400, position:"fixed", right:"100px", bottom:"50px", transition: "all 1s", fontSize:"20px", borderRadius:"10px"}}><div style={{width:"90%", margin:"0 auto", lineHeight:"50px", marginTop:"15px"}}><div onClick={clickTbox} style={{width:"20px", height:"20px", cursor:"pointer", position:"absolute", right:"-30px"}}>X</div><span style={{marginLeft:"10px"}}>웨딩홀</span><span style={{float:"right"}}>{comma(pboxp.wprice)}만원</span></div><div style={{width:"90%", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>스드메</span><span style={{float:"right"}}>{comma(pboxp.sprice)}만원</span></div><div style={{width:"90%", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>플래너</span><span style={{float:"right"}}>{comma(pboxp.pprice)}만원</span></div><div style={{width:"90%", height:"60px" ,borderBottom:"2px solid", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>허니문</span> <span style={{float:"right"}}>{comma(pboxp.hprice)}만원</span></div><div style={{color:"red", width: "90%", margin:"0 auto", marginTop:"10px", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>합계 </span><span style={{float:"right"}}>{comma(pboxp.wprice+pboxp.sprice+pboxp.pprice+pboxp.hprice)}만원</span></div><div className='dib1' onClick={dibBtn}>전체 찜하기💕</div></div> : <div className='dib2' onClick={clickTbox2} style={{position:"fixed", bottom:"280px", right:"18px", fontSize:"40px"}}>💌</div>}</>:
+      <><div id="pricebox" style={{background:"rgb(255, 248, 248)", opacity:"1" ,color:"black" ,height:365, width:400, position:"fixed", bottom:"50px", right:"-400px", transition: "all 1s", fontSize:"20px", borderRadius:"10px"}}><div style={{width:"90%", margin:"0 auto", lineHeight:"50px", marginTop:"15px"}}><div onClick={clickTbox} style={{width:"20px", height:"20px", cursor:"pointer", position:"absolute", right:"-30px"}}>X</div><span style={{marginLeft:"10px"}}>웨딩홀</span><span style={{float:"right"}}>{comma(pboxp.wprice)}만원</span></div><div style={{width:"90%", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>스드메</span><span style={{float:"right"}}>{comma(pboxp.sprice)}만원</span></div><div style={{width:"90%", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>플래너</span><span style={{float:"right"}}>{comma(pboxp.pprice)}만원</span></div><div style={{width:"90%", height:"60px" ,borderBottom:"2px solid", margin:"0 auto", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>허니문</span> <span style={{float:"right"}}>{comma(pboxp.hprice)}만원</span></div><div style={{color:"red", width: "90%", margin:"0 auto", marginTop:"10px", lineHeight:"50px"}}><span style={{marginLeft:"10px"}}>합계 </span><span style={{float:"right"}}>{comma(pboxp.wprice+pboxp.sprice+pboxp.pprice+pboxp.hprice)}만원</span></div><div className='dib1'>전체 찜하기💕</div></div>
+      </>}
+      </div>
+  )
+}
+
+export default EstimateItem;
+```
+- #### 검색 결과<br>
+받아온 data들을 정렬해서 띄워주고 상품을 클릭하면 선택한 상품들의 계산서가 나타나며 각 상품 찜하기, 선택 상품 찜하기 , 예약하기(결제(아임포트 결제 api 사용))를 할 수 있습니다.<br>
+
+
+- #### 검색 전 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215312868-a38a23d0-ee6e-415a-93f6-b8537388dd5f.png)
 
-- #### 네이버 로그인 후 화면<br><br>
+- #### 검색 후 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215312945-5cc50583-9ff1-4de1-8ec9-a7351212f39f.png)
-
-- #### 구글 로그인 후 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 
 ## ModalId.jsx 컴포넌트
 
-※ 아이디 찾기
+※ 찜하기
 ```javascript
 
-const ModalId = ({ setSelectId, setModalOpen }) => {
-    const [pwd, setPwd] = useState(false);
-    const modalRef = useRef(null);
-    const [ checkValue, setCheckValue ] = useState('');
-    
-    function checkOnlyOne(id) {
-        let checkPick = document.getElementsByName('checkWrap');
-        Array.prototype.forEach.call(checkPick, function (el) {
-          el.checked = false;
-        });
-        id.target.checked = true;
-        setCheckValue(id.target.defaultValue);
-    }
-
-    useEffect(() => {
-        // 이벤트 핸들러 함수
-        const handler = (event) => {
-            // mousedown 이벤트가 발생한 영역이 모달창이 아닐 때, 모달창 제거 처리
-            if (!modalRef.current.contains(event.target)) {
-                setSelectId(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handler);
-        
-        return () => {
-            document.removeEventListener('mousedown', handler);
-        };
-    });
-
-    const selectPwd = () => {
-        setPwd(true);
-    };
-
-    const [sid, setSid] = useState("");
-
-    const [id, setId] = useState({
-        mname : "",
-        mpid : "",
+export default () => {
+  const comma = (num) =>[num].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const id = sessionStorage.getItem("mid");
+  const nav = useNavigate();
+    const inputBorder= useRef();
+  const [dibData,setDibData] = useState([{}]);
+  useEffect(()=>{
+    axios.post("/searchDib", null, {params:{mid:id}})
+    .then((res)=>{
+      console.log(res.data);
+      setDibData(res.data);
     })
-
-    const onch = useCallback((e) => {
-
-        const formObj = {
-            ...id,
-            [e.target.name] : e.target.value,
-        };
-        setId(formObj);
-        console.log(formObj);
-    }, [id]);
-
-    const selectId = (e) => {
-        e.preventDefault();
-        axios
-            .post("selectId" , id)
-            .then((res) => {
-                console.log(res);
-                console.log(res.data);
-                {res.data === "일치하는 아이디가 없습니다." ? (setSid(res.data)) : (setSid("찾으려는 아이디 : " + res.data))}
-            })
-            .catch((err) => {alert('실패'); console.log(err)});
+  },[])
+  
+  const [likes, setLikes] = useState([
+    // {name: "gd"},
+    // {name: "gd"},
+    // {name: "gd"},
+  ])
+  console.log(dibData);
+  const {wh,sd,pl,ho} = dibData;
+  useEffect(()=>{
+    console.log(wh);
+    let ls = [];
+    if(wh!==undefined){
+      for(let i=0; i<wh.length; i++){
+        ls.push({dname: wh[i].whname, dtype: "웨딩홀", dprice: wh[i].whprice ,dwhidx:wh[i].whidx, dmid:id, bprice: wh[i].bprice ,dorder: i});
+        setLikes(ls);
+      }
     }
-
-    return (
-        <div className="modal">
-           <div ref={modalRef} className="container-two">
-               <section className="user-input">
-                   <img src={logo} alt="logo" className="ig2"/>
-                   <div className="tx">가입할 때 작성한 정보를 입력해주세요 :)</div>
-                   <hr className="hr"/>
-                   <div className="radiv">
-                    <div className="radiv1">
-                        <input type="checkbox" checked name="checkWrap" onChange={(e) => checkOnlyOne(e)} className="inra1"/><span className="sp" name="checkWrap" onChange={(e) => checkOnlyOne(e)}>아이디찾기</span>
-                    </div>
-                    <div className="radiv2"> 
-                        <input type="checkbox" name="checkWrap" onChange={(e) => checkOnlyOne(e)} onClick={selectPwd} className="inra2"/><span className="sp" onClick={selectPwd}>비밀번호 찾기</span>
-                        {pwd && <ModalPwd setSelectId={setSelectId} setPwd={setPwd} setCheckValue={setCheckValue} setModalOpen={setModalOpen}/>}
-                    </div>
-                   </div>
-                   <form onSubmit={selectId}>
-                    <div className="log-other1">이름</div>
-                    <input className="inp-id" onChange={onch} name="mname" type="text" maxLength="25" required placeholder="이름을 입력하세요."/>
-                    <div className="log-other1">주민등록번호</div>
-                        <input className="inp-id" onChange={onch} name="mpid" type="text" maxLength="13" required placeholder="- 를 제외한 13자리를 입력하세요."/>
-                    <div className="tx2">{sid}</div>
-                    <button type="submit" className="log-btnid">아이디 찾기</button>
-                   </form>
-                   <button className="log-btn-del" onClick={() => setSelectId(false)}>돌아가기</button>
-               </section>
-           </div>
-        </div>        
-    );
-};
-
-export default ModalId;
-```
-가입 시 작성한 이름과 주민등록번호를 쓰고 '아이디 찾기' 버튼을 클릭 해 데이터베이스에 일치하는 데이터가 없으면 없다는 문구와 일치하는 데이터가 있다면 아이디를 알려줍니다.
-
-## Back_MemberController
-```java
-@ResponseBody
-    @PostMapping("selectId")
-    public String selectId(@RequestBody Member member){
-        log.info("selectId()");
-        log.info("" + member);
-        return mServ.selectId(member);
-    }
-```
-## Back_MemberService
-```java
-public String selectId(Member member) {
-        log.info("selectId()");
-        Member m = null;
-        String msg = "";
-
-        try {
-            m = mRepo.findByMnameAndMpid(member.getMname(),member.getMpid());
-            log.info("" + m);
-            if (m != null){
-                return m.getMid();
-            }else {
-                return msg = "일치하는 아이디가 없습니다.";
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            return msg = "일치하는 아이디가 없습니다.";
+      if(sd!==undefined){
+        for(let i=0; i<sd.length; i++){
+          ls.push({dname: sd[i].scomp, dtype: "스드메", dprice: sd[i].sprice ,dsidx:sd[i].sidx, dmid:id, dorder: wh.length+i,});
+          setLikes(ls);
         }
+      }
+      if(pl!==undefined){
+        for(let i=0; i<pl.length; i++){
+          ls.push({dname: pl[i].pname, dtype: "플래너", dprice: pl[i].pprice ,dpidx:pl[i].pidx, dmid:id, dorder: wh.length+sd.length+i,});
+          setLikes(ls);
+        }
+      }
+      if(ho!==undefined){
+        for(let i=0; i<ho.length; i++){
+          ls.push({dname: ho[i].hlocation, dtype: "허니문", dprice: ho[i].hcost ,dhidx:ho[i].hidx, dmid:id, dorder: wh.length+sd.length+pl.length+i,});
+          setLikes(ls);
+        }
+      }
+  },[wh],[sd],[pl],[ho]);
+  // console.log({a})
+  // likes.concat();
+  // for(let i=1; i<3; i++){
+  //   likes.concat({name: dd[i]});
+  // }
+  // console.log(likes)
+  const [delData, setdelData] = useState([]);
+  const [delbtn, setDelbtn] = useState(false);
+
+  // const onRemoveHandler = (id) => () => {
+  //   if (!window.confirm(`${likes[id].name} 을 찜 목록에서 삭제하시겠습니까?`)) return
+
+
+  // }
+  const [showData,setShowData]=useState([]);;
+  useEffect(()=>{
+    let tempShow = []
+    console.log(likes);
+    tempShow=likes.slice();
+    console.log(tempShow)
+      for(let i =0; i<tempShow.length; i++){
+        tempShow[i]={...tempShow[i], dprice:comma(tempShow[i].dprice)}
     }
-```
-프론트에서 보낸 값으로 findBy~~ 함수를 이용해 데이터베이스에 일치하는 아이디가 있다면 아이디를 return, 없다면 없다는 문자열을 return 합니다.<br><br>
-#### 아이디찾기 화면 <br><br>
-![image](https://user-images.githubusercontent.com/117874997/215290054-025e4bc1-c952-41eb-aa3f-58decaaed7b7.png)
+    setShowData(tempShow);
+    console.log(showData);
+  },[likes])
 
-## ModalPwd.jsx 컴포넌트
 
-※ 비밀번호 재설정_1
-```javascript
-
-const ModalPwd = ({ setSelectId, setPwd, setCheckValue, setModalOpen }) => {
-    const modalRef = useRef(null);
-    const [reset, setReset] = useState(false);
-    const [findid, setFindid] = useState("");
-
-    const [info, setInfo] = useState({
-      mid : "",
-      mphone : "" 
-    })
-
-    const onch = useCallback(e => {
-      const formObj = {
-        ...info,
-        [e.target.name] : e.target.value,
-      };
-      setInfo(formObj);
-      console.log(formObj);
-    }, [info]);
-
-    function checkOnlyOne(id) {
-        let checkPick = document.getElementsByName('checkWrap');
-        Array.prototype.forEach.call(checkPick, function (el) {
-          el.checked = false;
-        });
-        id.target.checked = true;
-        setCheckValue(id.target.defaultValue);
+  useEffect(()=>{
+    console.log("여기요오오"+delData);
+    if(delbtn===true){
+      axios.post("/deleteDib", delData)
+      .then((res)=>{
+        window.alert("힝 삭제됐어");
+        setDelbtn(false);
+        nav(0);
+      });  
     }
 
-    useEffect(() => {
-        // 이벤트 핸들러 함수
-        const handler = (event) => {
-            // mousedown 이벤트가 발생한 영역이 모달창이 아닐 때, 모달창 제거 처리
-            if (!modalRef.current.contains(event.target)) {
-                setSelectId(false);
-            }
-        };
 
-        document.addEventListener('mousedown', handler);
-        
-        return () => {
-            document.removeEventListener('mousedown', handler);
-        };
-    });
+    //버튼누를때 유즈스테이트 하나 바뀌게해서 만약에 그값이 바뀌면 axios 보낸다 해주면될듯
+  },[delData,delbtn]);
 
-    const [dis, setDis] = useState(false);
-
-        function onClickCertification() {
-            /* 1. 가맹점 식별하기 */
-            const { IMP } = window;
-            IMP.init("???");    
-
-            /* 2. 본인인증 데이터 정의하기 */
-            const data = {
-              merchant_uid: `mid_${new Date().getTime()}`,  // 주문번호
-              company: 'WeddingDive',                    // 회사명 또는 URL
-              carrier: '',                               // 통신사
-            //   id: `${value}`,
-              name: '',                                  // 이름
-              phone: '',                        // 전화번호
-              popup:true,
-            };
-      
-            /* 4. 본인인증 창 호출하기 */
-            IMP.certification(data, callback);
-          }
-      
-          /* 3. 콜백 함수 정의하기 */
-          function callback(response) {
-            const {
-              success,
-              merchant_uid,
-              error_msg,
-            } = response;
-      
-            if (success) {
-              setDis(true);
-              alert('본인인증 성공');
-            } else {
-              alert(`본인인증 실패: ${error_msg}`);
-            }
-          }
-
-    const resetPage = (e) => {
-      e.preventDefault();
-
-      const pwd1 = document.getElementById("input1");
-      const pwd2 = document.getElementById("input2");
-
-      if(pwd1.value == "" || pwd2.value == ""){
-        return alert("빈 칸 안에 값을 입력하세요");
+  const [checkall,setCheckall] = useState(false);
+  const [checkList, setCheckList] = useState([]);
+  // useEffect(()=>{
+  //   console.log(delData,checkall);
+  // },[delData,checkall])
+  let tempdelData = [];
+  let tempcheckList = [];
+  let tempallData= [];
+  const onCheckboxChangeHandler = (e,index) => {
+    console.log(checkList.length, likes.length);
+    console.log(index);
+    if (e.target.name!=="rperson" && e.target.name!=="rdatestart" && e.target.name!=="rdateend"){
+      const val = Number(e.target.value)
+      setCheckList(checkList.includes(val) ? checkList.filter((v) => v !== val) : [...checkList, val])
+      console.log(val);
+      console.log(checkList);
+      {val ===-1&&checkall===false ? setCheckall(true): setCheckall(false)};
+      if(val===-1&&delData.length!==likes.length){
+        setCheckList([]);
+        setdelData([]);
+        setdelData(likes);
+        console.log("제바아아알")
+        console.log(delData);
+        return;
+      }else if(val===-1){
+        // setCheckList(checkList.filter(v=> v !== val));
+        setCheckall(false);
+        setdelData([]);
+        console.log(delData);
+        return;
+      }else if (val!==-1&&delData.length===likes.length){
+        setCheckall(false);
+        console.log(delData);
+        console.log(checkList);
+        for(let i = 0 ; i<likes.length; i++){
+          tempcheckList.push(i);
+        }
+        tempcheckList.splice(val,1);
+        setCheckList(tempcheckList);
+        tempallData = delData.slice();
+        tempallData.splice(val,1);
+        setdelData(tempallData);
+        return;
       }
 
-      console.log(info);
-      axios
-        .post("/checkPwd" , info)
-        .then((res) => {
-          console.log(res.data);
-          if(res.data === "조건에 일치하는 회원이 없습니다."){
-            alert(res.data);
-          }else {
-            setFindid(res.data);
-            setReset(true);
-          }
-        })
-        .catch((err) => console.log(err));
+
+
+      
+      console.log(e.target.checked,checkall)
+      console.log(likes[e.target.value].dtype, e.target.checked, checkall)
+      if(likes[e.target.value].dtype==="웨딩홀"&&e.target.checked===true &&checkall===false){
+        setdelData([...delData,{
+          dtype:"웨딩홀",
+          dmid:id,
+          dwhidx:likes[e.target.value].dwhidx,
+          dprice:likes[e.target.value].dprice,
+          dname:likes[e.target.value].dname,
+          dorder: index,
+          bprice: likes[e.target.value].bprice
+      }])}else if(likes[e.target.value].dtype==="웨딩홀"&&e.target.checked===false &&checkall===false){
+        setdelData(delData.filter(delData=>delData.dwhidx!==likes[e.target.value].dwhidx))
+      }
+      if(likes[e.target.value].dtype==="스드메"&&e.target.checked===true &&checkall===false){
+        console.log(likes[e.target.value].dsidx);
+        setdelData([...delData,{
+          dtype:"스드메",
+          dmid:id,
+          dsidx:likes[e.target.value].dsidx,
+          dprice:likes[e.target.value].dprice,
+          dname:likes[e.target.value].dname,
+          dorder:index,
+      }])}else if(likes[e.target.value].dtype==="스드메"&&e.target.checked===false &&checkall===false){
+        setdelData(delData.filter(delData=>delData.dsidx!==likes[e.target.value].dsidx))
+      }
+      if(likes[e.target.value].dtype==="플래너"&&e.target.checked===true &&checkall===false){
+        console.log(likes[e.target.value].dpidx);
+        setdelData([...delData,{
+        dtype:"플래너",
+        dmid:id,
+        dpidx:likes[e.target.value].dpidx,
+        dprice:likes[e.target.value].dprice,
+        dname:likes[e.target.value].dname,
+        dorder:index,
+      }])}else if(likes[e.target.value].dtype==="플래너"&&e.target.checked===false &&checkall===false){
+        setdelData(delData.filter(delData=>delData.dpidx!==likes[e.target.value].dpidx))
+      }
+      if(likes[e.target.value].dtype==="허니문"&&e.target.checked===true &&checkall===false){
+        console.log(likes[e.target.value].dhidx);
+        setdelData([...delData,{
+        dtype:"허니문",
+        dmid:id,
+        dhidx:likes[e.target.value].dhidx,
+        dprice:likes[e.target.value].dprice,
+        dname:likes[e.target.value].dname,
+        dorder:index,
+      }])}else if(likes[e.target.value].dtype==="허니문"&&e.target.checked===false &&checkall===false){
+        setdelData(delData.filter(delData=>delData.dhidx!==likes[e.target.value].dhidx))
+      }
     }
 
-    return (
-        <div className="modal">
-           <div ref={modalRef} className="container-three">
-               <section className="user-input">
-                   <img src={logo} alt="logo" className="ig2"/>
-                   <div className="tx">가입할 때 작성한 정보를 입력해주세요 :)</div>
-                   <hr className="hr"/>
-                   <div className="radiv">
-                    <div className="radiv1">
-                        <input type="checkbox" className="inra1" name="checkWrap" onChange={(e) => checkOnlyOne(e)} onClick={() => setPwd(false)}/><span className="sp" onClick={() => setPwd(false)}>아이디찾기</span>
-                    </div>
-                    <div className="radiv2"> 
-                        <input type="checkbox" className="inra2" checked name="checkWrap" onChange={(e) => checkOnlyOne(e)} /><span className="sp">비밀번호 찾기</span>
-                    </div>
-                   </div>
-                   <div className="log-other1">아이디</div>
-                   <input className="inp-id" type="text" id="input1" name="mid" onChange={onch} maxLength="25" required placeholder="아이디를 입력하세요."/>
-                   <div className="log-other1">핸드폰 번호</div>
-                   <div>
-                    <input className="phonenum" type="text" id="input2" name="mphone" onChange={onch} maxLength="11" required placeholder="핸드폰 번호를 입력하세요."/>
-                   <button className="phonebtn" style={{lineHeight:'18px', paddingTop:'-25px'}} onClick={onClickCertification}>인증<br/>번호</button></div>
-                   {dis === true ? (<button className="log-btnid" id="joinIn" onClick={resetPage}>비밀번호 재설정하기</button>) : ( <button className="log-btnid2" id="joinIn" disabled>비밀번호 재설정하기</button> )}
-                   {/* //  <button className="log-btnid" id="joinIn" disabled onClick={resetPage}>비밀번호 재설정하기</button> */}
-                   <button className="log-btn-del" onClick={() => setSelectId(false)}>돌아가기</button>
-               </section>
-               {reset && <ModalPwdReset setReset={setReset} setModalOpen={setModalOpen} findid={findid}/>}
-           </div>
-        </div>        
-    );
-};
 
-export default ModalPwd;
-```
-가입 시 작성한 아이디와 핸드폰번호를 쓰고 '인증번호' 버튼을 클릭 해 인증확인 절차까지 밟아야 '비밀번호 재설정' 버튼의 비활성화가 풀리게 했습니다. 이후 작성한 정보와 일치하는
-회원이 데이터베이스에 있을 경우, 그 회원의 아이디를 useState에 저장 후 비밀번호 재설정하는 모달창으로 이동합니다.
-
-## Back_MemberController
-```java
-    @ResponseBody
-    @PostMapping("checkPwd")
-    public String checkPwd(@RequestBody Member member){
-        log.info("checkPwd()");
-        return mServ.checkPwd(member);
+    if (e.target.name==="rperson" || e.target.name==="rdatestart" || e.target.name==="rdateend"){
+      tempdelData=delData.slice();
+      // console.log(delData.findIndex(d=>d.dorder===index));
+      if(tempdelData.length!==0 &&e.target.name==="rperson"){
+      tempdelData[delData.findIndex(d=>d.dorder===index)]={...tempdelData[delData.findIndex(d=>d.dorder===index)],[e.target.name]:parseInt(e.target.value)};
+      setdelData(tempdelData);
+      } else if(tempdelData.length!==0 &&e.target.name!=="rperson"){
+        tempdelData[delData.findIndex(d=>d.dorder===index)]={...tempdelData[delData.findIndex(d=>d.dorder===index)],[e.target.name]:e.target.value};
+        setdelData(tempdelData);
+        }
+      console.log(tempdelData);
+      console.log(index);
+      console.log(checkall)
     }
-```
-## Back_MemberService
-```java
-        public String checkPwd(Member member) {
-        log.info("checkPwd()");
-        String msg = "";
+  }
 
-        try {
-            Member id = mRepo.findByMidAndMphone(member.getMid(),member.getMphone());
-            log.info("조건에 일치하는 ID : " + id);
-            if (id != null){
-                return id.getMid();
-            }else {
-                return msg = "조건에 일치하는 회원이 없습니다.";
+  const borderChange = (e)=> {
+    inputBorder.current.style.border="1px solid lightGray";
+    inputBorder.current = e.target;
+    inputBorder.current.style.border="1px solid black";
+  }
+  const personRegExp = /^[0-9]{0,4}$/;
+  const dataConfirm= (e) =>{
+    if(!personRegExp.test(inputBorder.current.value)){
+      window.alert("0명 이상 입력해주세요");
+      inputBorder.current.value="";
+    }
+  }
+  console.log(delData);
+  return (
+    <div style={{ width: '100%' }}>
+      <Table
+        columns={[
+          {
+            name: checkall === false ? <input type="checkBox" checked={false} value={-1} onChange={(e)=>onCheckboxChangeHandler(e)}/>:<input type="checkBox" checked={true} value={-1} onChange={(e)=>onCheckboxChangeHandler(e)}/>,
+            render: (v, index) => (
+              checkall === true ? <input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)} checked/> : checkall === false && checkList.indexOf(index) !== -1 ? <input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)} checked/>:<input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)}/>
+            ),
+          },
+          {
+            name: '등록번호',
+            render: (v, index) => index + 1,
+            style: {
+              width: 80,
+            },
+          },
+          {
+            name: '타입',
+            id: 'dtype',
+          },
+          {
+            name: '상품명',
+            id: 'dname',
+          },
+          {
+            name: '예약일 선택',
+            render: (v,index) => ( checkall===false ?( likes[index].dtype !== "허니문" && checkList.indexOf(index) === -1 ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}} disabled/> : likes[index].dtype !== "허니문" && checkList.indexOf(index) !== -1 ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}}/> : checkList.indexOf(index) === -1 ? <><input type="date" disabled onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' disabled onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></> :  <><input type="date" onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></>)
+            :( likes[index].dtype !== "허니문" ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}}/> : <><input type="date" onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></>)),
+            id: 'selectRdate',
+          },
+          {
+            name: '1인 식대',
+            render: (v,index) => likes[index].dtype === "웨딩홀"?<div type="text" name="bprice" style={{width:"50px", textAlign:"center"}}>{likes[index].bprice} 만원</div>: null,
+            id: 'bprice',
+          },
+          {
+            name: '인원 선택',
+            render: (v,index) => ( checkall===false ?( likes[index].dtype === "웨딩홀" && checkList.indexOf(index) === -1 ?<><input type="text" disabled ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></> : likes[index].dtype === "웨딩홀" && checkList.indexOf(index) !== -1 ?  <><input type="text" ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></>:null)
+            : ( likes[index].dtype === "웨딩홀" ?  <><input type="text" ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></>:null)),
+            id: 'selectPopu',
+          },
+          {
+            name: '가격',
+            render: (v,index) => likes[index].dtype === "웨딩홀" && (delData[delData.findIndex(d=>d.dorder===index)]?.rperson ===null || delData[delData.findIndex(d=>d.dorder===index)]?.rperson === undefined || delData[delData.findIndex(d=>d.dorder===index)]?.rperson === "")?<div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index]?.dprice} 만원</div>: likes[index].dtype === "웨딩홀"&&(checkList.indexOf(index) !==-1||checkall)&&(delData[delData.findIndex(d=>d.dorder===index)]?.rperson !==null || delData[delData.findIndex(d=>d.dorder===index)]?.rperson !==undefined || delData[delData.findIndex(d=>d.dorder===index)]?.rperson !== "") ?<div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index].dprice+delData[delData.findIndex(d=>d.dorder===index)].bprice*delData[delData.findIndex(d=>d.dorder===index)].rperson} 만원</div> : <div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index].dprice} 만원</div>,
+            id: 'dprice',
+          },
+        ]}
+        dataSource={showData}
+      />
+      <div style={{float:"right", marginTop:'50px', width:200, display:"flex", justifyContent:"space-around"}}>
+        <Button onClick={()=>setDelbtn(true)}>선택삭제</Button>
+      <Payment ptext="결제하기" pData={delData} />
+      </div>
+    </div>
+  )
+}
+```
+'찜하기' 버튼을 클릭 해 선택한 상품 백으로 보내줍니다.
+
+## Back_DibController
+```java
+@RestController
+@Log
+public class DibController {
+
+    @Autowired
+    private DibService  dServ;
+
+    @PostMapping("/ddibInsert")
+    public String ddibInsert (@RequestBody List<Dib> dibData){
+        log.info("ddibInsert()");
+        log.info("띱"+dibData);
+        return dServ.ddibInsert(dibData);
+    }
+}
+## Back_DibService
+```java
+@Service
+@Log
+public class DibService {
+    @Autowired
+    private DibRepository dRepo;
+    @Autowired
+    private WeddingHoleRepository whRepo;
+    @Autowired
+    private SDMRepository sRepo;
+    @Autowired
+    private PlannerRepository pRepo;
+    @Autowired
+    private HoneyMoonRepository hRepo;
+    public String ddibInsert(List<Dib> dibData) {
+        String res = null;
+        try{
+            for(Dib dList : dibData){
+                dRepo.save(dList);
             }
+            res="Success";
+        }catch(Exception e){
+            e.printStackTrace();
+            res="Failed";
+        }
+
+        return res;
+    }
+}
+```
+프론트에서 보낸 값을 database에 저장해줍니다.<br><br>
+
+- #### 상품 선택 후 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
+
+- #### 선택 상품 찜한 후 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
+
+
+※ 결제하기
+```javascript
+
+const Payment = ({ effect, deps, ptext, width, height, zIndex, wlist, slist, plist, hlist, pData,borderRadius,background,...props }) => {
+  const nav = useNavigate();
+  useEffect(() => {
+    const jquery = document.createElement("script");
+    jquery.src = "https://code.jquery.com/jquery-1.12.4.min.js";
+    const iamport = document.createElement("script");
+    iamport.src = "https://cdn.iamport.kr/js/iamport.payment-1.1.7.js";
+    document.head.appendChild(jquery);
+    document.head.appendChild(iamport);
+    return () => {
+        document.head.removeChild(jquery); document.head.removeChild(iamport);
+    }
+  }, []);
+  const id = sessionStorage.getItem("mid");
+  const name = sessionStorage.getItem("mname");
+  const phone = sessionStorage.getItem("mphone");
+  const [data, setData] = useState({
+    pg: 'html5_inicis.INIpayTest', // PG사 (필수항목)
+    pay_method: 'card', // 결제수단 (필수항목)
+    merchant_uid: `mid_${new Date().getTime()}`, // 결제금액 (필수항목)
+    name: '결제 테스트', // 주문명 (필수항목)
+    amount: '100', // 금액 (필수항목)
+    custom_data: { name: '부가정보', desc: '세부 부가정보' },
+    buyer_name: name, // 구매자 이름
+    buyer_tel: phone, // 구매자 전화번호 (필수항목)
+    buyer_email: null, // 구매자 이메일
+    buyer_addr: null,
+    buyer_postalcode: null,
+  });
+
+  const [reservData,setReservData] = useState([])
+    
+
+    useEffect(()=>{
+      console.log("피데이터"+pData);
+      console.log(pData);
+      if(pData===undefined||pData.length===0){
+        return;
+      }
+      if(pData!==undefined&&pData.length!==0){
+        let tprice=0;
+        for(let i =0; i<pData.length; i++){
+          if(pData[i].dtype==="웨딩홀"){
+            // for(let i =0; i<pData.length; i++){
+              tprice=tprice+pData[i].dprice+pData[i].bprice*pData[i]?.rperson;
+            // }
+            console.log(pData[i].bprice);
+          }else {
+              tprice=tprice+pData[i].dprice;
+        }
+        }
+        if(pData.length>1){
+          console.log(tprice);
+        setData({...data,
+          amount:tprice,
+          name: pData[0].dname+" 외"+(pData.length-1).toString()+"건",
+        })}
+        else if(pData.length===1){
+          setData({...data,
+            amount:tprice,
+            name: pData[0].dname,
+          })
+        }
+        console.log(tprice);
+
+      }
+        console.log(data.name)
+      },[pData]);
+  
+    useEffect(()=>{
+        if(wlist!==undefined){
+        setData({...data,
+          name:wlist.whname,
+          amount:wlist.whprice,
+        })}
+    },[wlist]);
+    
+    useEffect(()=>{
+      if(slist!==undefined){
+      setData({...data,
+        name:slist.scomp,
+        amount:slist.sprice,
+      })}
+    },[slist]);
+
+    useEffect(()=>{
+      if(plist!==undefined){
+      setData({...data,
+        name:plist.pname,
+        amount:plist.pprice,
+      })}
+  },[plist]);
+
+    useEffect(()=>{
+      if(hlist!==undefined){
+      setData({...data,
+        name:hlist.hlocation,
+        amount:hlist.hcost,
+      })}
+    },[hlist]);
+
+    let fiData = [];
+    const [paybtn, setPayBtn]=useState(false);
+    useEffect(()=>{
+      if(reservData?.length===0||reservData===undefined||reservData?.length>pData?.length){
+        return;
+      }
+
+      for(let i=0; i<pData?.length; i++){
+        if(pData[i]?.dtype==="웨딩홀"){
+            fiData.push({
+            rwhidx: pData[i].dwhidx,
+            rcost: pData[i].dprice,
+            rmid:id,
+            rimpuid: reservData[0].rimpuid,
+            rtype:"웨딩홀",
+            rstatus : "진행예정",
+            rdatestart : pData[i].rdatestart,
+            rperson : pData[i].rperson
+          })}else if(pData[i]?.dtype==="스드메"){
+            fiData.push({
+            rsidx: pData[i].dsidx,
+            rcost:pData[i].dprice,
+            rmid:id,
+            rimpuid: reservData[0].rimpuid,
+            rtype:"스드메",
+            rstatus : "진행예정",
+            rdatestart : pData[i].rdatestart,
+          })}else if(pData[i]?.dtype==="플래너"){
+            fiData.push({
+            rpidx: pData[i].dpidx,
+            rcost:pData[i].dprice,
+            rmid:id,
+            rimpuid: reservData[0].rimpuid,
+            rtype:"플래너",
+            rstatus : "진행예정",
+            rdatestart : pData[i].rdatestart,
+          })}else if(pData[i]?.dtype==="허니문"){
+            fiData.push({
+            rhidx: pData[i].dhidx,
+            rcost:pData[i].dprice,
+            rmid:id,
+            rimpuid: reservData[0].rimpuid,
+            rtype:"허니문",
+            rstatus : "진행예정",
+            rdatestart : pData[i].rdatestart,
+            rdateend : pData[i].rdateend,
+          })}
+      }
+      console.log(reservData);
+      if(fiData.length===0){
+      // setReservData(fiData);
+        fiData.push(reservData);
+        fiData=fiData[0];
+      }
+
+      console.log(fiData);
+      if(fiData.length!==0&&paybtn===true){
+      axios.post("/insertReservation" , fiData)
+      .then((res) => {console.log(res);
+          fiData=null;
+          setReservData([]);
+          setPayBtn(false);
+          nav(0);
+        }
+      ).catch((err)=>{
+        fiData=[];
+        setReservData([]);
+        setPayBtn(false);
+      });
+    }
+    },[paybtn])
+  
+const onClickPayment = () => {
+  console.log(data)
+  if(id===undefined || id===null || id===""){
+    window.alert("로그인 후 이용 가능한 서비스입니다.");
+    return;
+  }
+  if(pData?.length===0){
+    window.alert("찜목록을 선택해주세요!")
+    return;
+  }
+  console.log(pData)
+  for(let i = 0; i<pData?.length; i++){
+    switch(pData[i].dtype){
+      case "웨딩홀":
+        if(pData[i].rdatestart===undefined){
+          window.alert("웨딩홀 예약일을 선택해주세요!");
+          return;
+        }else if(pData[i].rperson===undefined){
+          window.alert("인원을 입력해주세요!");
+          return;
+        };
+        break;
+      case "스드메" :
+        if(pData[i].rdatestart===undefined){
+          window.alert("스드메 예약일을 선택해주세요!");
+          return;
+        };
+        break;
+      case "플래너" :
+        if(pData[i].rdatestart===undefined){
+          window.alert("플래너 예약일을 선택해주세요!");
+          return;
+        };
+        break;
+      case "허니문" :
+        if(pData[i].rdatestart===undefined){
+          window.alert("출발날짜를 선택해주세요!");
+          return;
+        } else if(pData[i].rdateend===undefined){
+          window.alert("종료날짜를 선택해주세요!");
+          return;
+        }
+        break;
+    }
+  }
+
+    // imp51345423
+    console.log(data);
+  const { IMP } = window;
+  IMP.init("imp18221811"); // 결제 데이터 정의
+  IMP.request_pay(data, callback);  //data에는 결제를 위한 정보들을 담은 객체를 전달해야 합니다. 예를 들어, buyer_name(주문자명), amoun(결제 금액), pg(사용할 PG사), pay_method(결제수단) 등이 존재합니다.
+  console.log(data);
+}                                   //callback 정보를 이용해 결제창을 호출하고, 유저가 입력한 카드 정보들이 카드사 서버로 전달되어 인증을 거치고, 인증이 성공하면 인증키를 PG에 전달하는 등 복잡한 과정을 거친 후, 콜백 함수가 호출됩니다
+
+
+  const callback = (response) => {
+    const {success, error_msg, imp_uid, merchant_uid, pay_method, paid_amount, status} = response;
+    const tokenData={
+      "imp_uid" : imp_uid
+    }
+
+    if (success) {
+      console.log(imp_uid);
+      if(wlist!==undefined){
+        setReservData([...reservData,{
+          rwhidx: wlist.whidx,
+          rcost:paid_amount,
+          rmid:id,
+          rimpuid: imp_uid,
+          rtype:"웨딩홀",
+          rstatus : "진행예정",
+        }])
+      }else if(slist!==undefined){
+        setReservData([...reservData,{
+          rsidx: slist.sidx,
+          rcost:paid_amount,
+          rmid:id,
+          rimpuid: imp_uid,
+          rtype:"스드메",
+          rstatus : "진행예정",
+        }])
+      }else if(plist!==undefined){
+        setReservData([...reservData,{
+          rpidx: plist.pidx,
+          rcost:paid_amount,
+          rmid:id,
+          rimpuid: imp_uid,
+          rtype:"플래너",
+          rstatus : "진행예정",
+        }])
+      }else if(hlist!==undefined){
+        setReservData([...reservData,{
+          rhidx: hlist.hidx,
+          rcost:paid_amount,
+          rmid:id,
+          rimpuid: imp_uid,
+          rtype:"허니문",
+          rstatus : "진행예정",
+        }])
+      }
+
+      if(pData?.length!==0&&pData!==undefined){
+        // for(let i=0; i<pData.length; i++){
+          if(pData[0]?.dtype==="웨딩홀"){
+              setReservData([...reservData,{
+                rhidx: pData[0].dwhidx,
+                rcost: pData[0].dprice,
+                rmid:id,
+                rimpuid: imp_uid,
+                rtype:"웨딩홀",
+                rstatus : "진행예정",
+              }])}else if(pData[0]?.dtype==="스드메"){
+              setReservData([...reservData,{
+                rhidx: pData[0].dsidx,
+                rcost:pData[0].dprice,
+                rmid:id,
+                rimpuid: imp_uid,
+                rtype:"스드메",
+                rstatus : "진행예정",
+              }])}else if(pData[0]?.dtype==="플래너"){
+              setReservData([...reservData,{
+                rhidx: pData[0].dpidx,
+                rcost:pData[0].dprice,
+                rmid:id,
+                rimpuid: imp_uid,
+                rtype:"플래너",
+                rstatus : "진행예정",
+              }])}else if(pData[0]?.dtype==="허니문"){
+              setReservData([...reservData,{
+                rhidx: pData[0].dhidx,
+                rcost:pData[0].dhprice,
+                rmid:id,
+                rimpuid: imp_uid,
+                rtype:"허니문",
+                rstatus : "진행예정",
+              }])}
+          // }
+      }
+      
+      window.alert('결제 성공');
+      setPayBtn(true);
+    } else {
+      window.alert(`결제 실패 : ${error_msg}`);
+    }
+  }
+  
+  return (
+    <>
+      <span onClick={onClickPayment}><Button style={{width:`${width}`, height:`${height}`, zIndex:`${zIndex}`, background:`${background}`, borderRadius:`${borderRadius}`}}>{ptext}</Button></span>
+    </>
+   );
+}
+  
+  export default Payment;
+```
+'예약하기' 버튼을 클릭 하면 결제 모듈이 나타나고 실제 결제가 진행 됩니다. 해당 상품의 이름과 가격이 모듈에 나타나도록 설정 했습니다.
+
+## Back_PaymentController
+```java
+@CrossOrigin(origins ="http://localhost:3000")
+@RestController
+@Log
+public class PaymentController {
+        //    @Value("${pgmodule.imp_uid}")
+    @Value("${pgmodule.imp_key}")
+    public String imp_key;
+    @Value("${pgmodule.imp_secret}")
+    public String imp_secret;
+
+    @Autowired
+    PaymentService pServ;
+        @PostMapping("/insertReservation")
+    public String insertReservation(@RequestBody List<Reservations> reservations){
+        log.info("insertReservation()");
+        log.info(""+reservations);
+        String msg=pServ.insertReservation(reservations);
+        return msg;
+    }
+
+    @GetMapping("/myReservation")
+    public Map myReservation(@RequestParam String mid){
+        log.info("myReservation()");
+        log.info(mid);
+        return pServ.myReservation(mid);
+    }
+
+    @PostMapping("/TokenRequest")
+    public String TokenRequest(@RequestBody Map refundData){
+        log.info("이게 뭐게???"+refundData.get("imp_uid"));
+        log.info("이게 뭐게???"+imp_secret);
+        log.info("이게 뭐게???"+imp_key);
+        String imp_uid = refundData.get("imp_uid").toString();
+        log.info(imp_uid);
+        String access=pServ.TokenRequest(imp_key, imp_secret);
+        log.info("토큰"+access);
+//        pServ.getBuyerInfo(imp_uid, access);
+        String res=refundCall(imp_uid, access);
+        pServ.getBuyerInfo(imp_uid, access);
+
+        return res;
+    }
+//    tokenRequest end
+
+    @PostMapping("/refundCall")
+    public String refundCall(String imp_uid, String access){
+        log.info("이얻앙ㅁㅁㄴ엄ㄴ안ㅁ안언ㅁ엄ㄴㅇ"+access);
+        String res = pServ.refundCall(imp_uid, access);
+        return res;
+    }
+
+    @PostMapping("delReserv")
+    public String delReserv(@RequestBody Map delReserv){
+        log.info("delReserv()");
+        log.info("das"+delReserv.toString());
+        String ridx= delReserv.get("ridx").toString();
+        log.info(""+ridx);
+        String res=pServ.delReserv(Integer.parseInt(ridx));
+        return res;
+    }
+
+}
+```
+## Back_PaymentService
+```java
+        @Service
+@Log
+public class PaymentService {
+    @Autowired
+    PaymentRepository pRepo;
+    @Autowired
+    ReservationRepository rRepo;
+    @Autowired
+    DibRepository dRepo;
+    @Autowired
+    WeddingHoleRepository wRepo;
+    @Autowired
+    SDMRepository sRepo;
+    @Autowired
+    PlannerRepository planRepo;
+    @Autowired
+    HoneyMoonRepository hRepo;
+
+    @Transactional
+    public String inputData(Refund refund){
+        log.info("inputData()");
+        String res = null;
+        log.info(refund.getMerchant_uid());
+        try {
+            pRepo.save(refund);
+            res = "Ok";
         }catch (Exception e){
             e.printStackTrace();
-            return msg = "조건에 일치하는 회원이 없습니다.";
+            res = "Fail";
+        }
+        log.info(res);
+        return res;
+    }
+
+    @PostMapping("/getBuyerInfo")
+    public void getBuyerInfo(String imp_uid, String access){
+        RestTemplate restTemplate= new RestTemplate();
+        log.info("이얻앙ㅁㅁㄴ엄ㄴ안ㅁ안언ㅁ엄ㄴㅇ"+access);
+        HttpHeaders headers= new HttpHeaders();
+    //        headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "https://api.iamport.kr/");
+    //        headers.ACCESS_CONTROL_ALLOW_ORIGIN("sdfdd", headers.add();)
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer "+access);
+
+        Map<String, Object> body=new HashMap<>();
+        body.put("imp_uid", imp_uid);
+    //        body.put("imp_key", imp_key);
+    //        body.put("imp_secret", imp_secret);
+        Gson var = new Gson();
+        String json= var.toJson(body);
+        //
+        try{
+            HttpEntity<String> entity=new HttpEntity<>(json, headers);
+            log.info("이게 뭐게???"+entity);
+            log.info("이게 뭐게???"+entity.getBody());
+            log.info("이게 뭐게???"+entity.getHeaders());
+            log.info("이게 뭐게???"+entity.getClass());
+            log.info("이게 뭐게???"+ JSONObject.class);
+            ResponseEntity<String> buyerInfo=restTemplate.postForEntity("https://api.iamport.kr/payments/"+imp_uid, entity, String.class);
+
+            System.out.println(buyerInfo+"fullBuyerInfo");
+            System.out.println(buyerInfo.getBody()+"fullbuyerInfo");
+    //            System.out.println(token.getStatusCode()+"getToken");
+    //            System.out.println(token.getStatusCodeValue()+"getTokenValue");
+    //            System.out.println(token.getBody()+"tokenBody");
+    //            System.out.println(token.getBody().get("response")+"tokenBody");
+        }catch (Exception e){
+           e.printStackTrace();
         }
     }
-```
-프론트에서 보낸 값으로 findBy~~ 함수를 이용해 데이터베이스에 일치하는 아이디가 있다면 아이디를 return, 없다면 없다는 문자열을 return 합니다.<br><br>
-#### 비밀번호 재설정 화면_1<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215290351-a523b48e-4068-4803-b931-a7a0e54866ce.png)
 
-## ModalPwdReset.jsx 컴포넌트
+    public String insertReservation(List<Reservations> reservations) {
+        String msg=null;
+        log.info("이게 정보다아아"+reservations.toString());
+        try {
+            for(Reservations rList : reservations) {
+                rRepo.save(rList);
+                switch (rList.getRtype()){
+                    case "웨딩홀":
+                        dRepo.deleteByDwhidxmid(rList.getRwhidx(), rList.getRmid());
+                        break;
+                    case "스드메":
+                        dRepo.deleteByDsidxmid(rList.getRsidx(), rList.getRmid());
+                        break;
+                    case "플래너":
+                        dRepo.deleteByDpidxmid(rList.getRpidx(), rList.getRmid());
+                        break;
+                    case "허니문":
+                        dRepo.deleteByDhidxmid(rList.getRhidx(), rList.getRmid());
+                        break;
+                }
+            }
+            msg="성공";
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            msg="실패";
+        }
+        return msg;
+    }
+
+
+    public Map myReservation(String mid) {
+        List<Reservations> rList = new ArrayList<>();
+        List<WeddingHall> wList= new ArrayList<>();
+        List<SDM> sList= new ArrayList<>();
+        List<Planner> pList= new ArrayList<>();
+        List<HoneyMoon> hList= new ArrayList<>();
+        Map tMap = new HashMap();
+        try{
+            rList = rRepo.findByRmid(mid);
+            for(Reservations rno : rList){
+                switch (rno.getRtype()){
+                    case "웨딩홀":
+                        wList.add(wRepo.findByWhidx(rno.getRwhidx()));
+                        break;
+                    case "스드메":
+                        sList.add(sRepo.findBySidx(rno.getRsidx()));
+                        break;
+                    case "플래너":
+                        pList.add(planRepo.findByPidx(rno.getRpidx()));
+                        break;
+                    case "허니문":
+                        hList.add(hRepo.findByHidx(rno.getRhidx()));
+                        break;
+                }
+            }
+        log.info("돌리기전"+pList);
+            for(Reservations rno : rList){
+                switch(rno.getRtype()){
+                    case "웨딩홀":
+                        for(WeddingHall wno : wList){
+                            if(wno.getWhidx()==rno.getRwhidx()){
+                                wno.setWhrList(rno);
+                            }
+                        }
+                        break;
+                    case "스드메":
+                        for(SDM sno : sList){
+                            if(sno.getSidx()==rno.getRsidx()){
+                                sno.setSrList(rno);
+                            }
+                        }
+                        break;
+                    case "플래너":
+                        for(Planner pno : pList){
+                            if(pno.getPidx()==rno.getRpidx()){
+                                pno.setPrList(rno);
+                            }
+                        }
+                        break;
+                    case "허니문":
+                        for(HoneyMoon hno : hList){
+                            if(hno.getHidx()==rno.getRhidx()){
+                                hno.setHrList(rno);
+                            }
+                        }
+                        break;
+                }
+            }
+                log.info("돌린후"+pList);
+            tMap.put("rw", wList);
+            tMap.put("rs", sList);
+            tMap.put("rp", pList);
+            tMap.put("rh", hList);
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return tMap;
+    }
+
+    public String TokenRequest(String imp_key, String imp_secret) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+//        headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "https://api.iamport.kr/");
+//        headers.ACCESS_CONTROL_ALLOW_ORIGIN("sdfdd", headers.add("access","*",));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+//        body.put("imp_uid", imp_uid);
+        body.put("imp_key", imp_key);
+        body.put("imp_secret", imp_secret);
+        Gson var = new Gson();
+        String json = var.toJson(body);
+        String access = null;
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(json, headers);
+            log.info("이게 뭐게???" + entity);
+            log.info("이게 뭐게???" + entity.getBody());
+            log.info("이게 뭐게???" + entity.getHeaders());
+            log.info("이게 뭐게???" + entity.getClass());
+            log.info("이게 뭐게???" + JSONObject.class);
+            ResponseEntity<String> token = restTemplate.postForEntity("https://api.iamport.kr/users/getToken", entity, String.class);
+
+            System.out.println(token + "fullToken");
+            System.out.println(token.getBody() + "fullToken");
+//            System.out.println(token.getStatusCode()+"getToken");
+////            System.out.println(token.getStatusCodeValue()+"getTokenValue");
+////            System.out.println(token.getBody()+"tokenBody");
+//            System.out.println(token.getBody().get("response")+"tokenBody");
+            access = token.getBody().substring(53, 93);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return access;
+    }
+
+
+    public String refundCall(String imp_uid, String access) {
+        RestTemplate restTemplate= new RestTemplate();
+        String res = "Failed";
+        HttpHeaders headers= new HttpHeaders();
+//        headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "https://api.iamport.kr/");
+//        headers.ACCESS_CONTROL_ALLOW_ORIGIN("sdfdd", headers.add();)
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer "+access);
+
+        Map<String, Object> body=new HashMap<>();
+        body.put("imp_uid", imp_uid);
+//        body.put("imp_key", imp_key);
+//        body.put("imp_secret", imp_secret);
+        Gson var = new Gson();
+        String json= var.toJson(body);
+        try{
+            HttpEntity<String> entity=new HttpEntity<>(json, headers);
+            log.info("이게 뭐게???"+entity);
+            log.info("이게 뭐게???"+entity.getBody());
+            log.info("이게 뭐게???"+entity.getHeaders());
+            log.info("이게 뭐게???"+entity.getClass());
+            log.info("이게 뭐게???"+JSONObject.class);
+            ResponseEntity<String> buyerInfo=restTemplate.postForEntity("https://api.iamport.kr/payments/cancel", entity, String.class);
+
+            System.out.println("환불 성공");
+            System.out.println(buyerInfo+"fullBuyerInfo");
+            System.out.println(buyerInfo.getBody()+"fullbuyerInfo");
+//            System.out.println(token.getStatusCode()+"getToken");
+//            System.out.println(token.getStatusCodeValue()+"getTokenValue");
+//            System.out.println(token.getBody()+"tokenBody");
+//            System.out.println(token.getBody().get("response")+"tokenBody");
+            res="Success";
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    public String delReserv(int ridx) {
+        String res="Failed";
+        Reservations rData = new Reservations();
+        try{
+            rData=rRepo.findByRidx(ridx);
+            rData.setRstatus("환불완료");
+            rRepo.save(rData);
+            res="Success";
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+}
+```
+프론트에서 보낸 값으로 결제가 성공했다면 데이터베이스에 해당 결제 상품을 저장해 줍니다.<br><br>
+- #### 예약 버튼 클릭 후 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 
 ※ 비밀번호 재설정_2
 ```javascript
