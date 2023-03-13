@@ -2347,7 +2347,10 @@ public class PaymentService {
 ![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 
 
-## 메인 페이지 팝업창
+
+
+
+## 이벤트 팝업창
 
 ※ EventModal.jsx
 ```javascript
