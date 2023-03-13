@@ -920,7 +920,7 @@ log.info(hseoul+"이거왜안되지?");
 }
 ```
 
----java
+---jpa
 
 public interface SDMRepository extends CrudRepository<SDM, Integer> {
     SDM findBySidx(int sidx);
