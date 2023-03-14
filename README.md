@@ -5182,6 +5182,9 @@ export default JoinModal;
 #### 아임포트 휴대폰 인증 api<br><br>
 <img width="263" alt="휴대폰 인증" src="https://user-images.githubusercontent.com/117880554/224962492-32715b7e-ad68-4e9d-9c8e-31fd7c0a5eab.png">
 
+#### 회원가입 성공 화면<br><br>
+<img width="1106" alt="회원가입 성공" src="https://user-images.githubusercontent.com/117880554/224960570-127339e2-a366-471f-9753-aa317337fc72.png">
+
 
 
 ## Back_MemberController
