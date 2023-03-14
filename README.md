@@ -27,7 +27,7 @@ View 템플릿 : React<br>
 - 회원가입<br>
 ## ModalBasic.jsx 컴포넌트
 
-※ 상세 견적 조회
+※ 1. 상세 견적 조회
 
 ```javascript
 
@@ -2346,11 +2346,9 @@ public class PaymentService {
 - #### 예약 버튼 클릭 후 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 
+<br><br>
 
-
-
-
-## 이벤트 팝업창
+## 2. 이벤트 팝업창
 
 ※ EventModal.jsx
 ```javascript
@@ -2469,412 +2467,685 @@ export default () => {
 ```
 
 - #### 메인 페이지 화면<br>
+![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
 페이지에 들어가자마자 팝업창을 띄워줍니다. '오늘 하루 보지 않기' 버튼을 클릭했을때 쿠키를 사용해서 더 이상 팝업창이 뜨지 않도록 설정해주었습니다.
 
-## ServiceCenterWrite.jsx 컴포넌트
 
-※ 상담문의 글쓰기 (비회원은 글쓰기X)
+## 마이페이지
+
+※ Mypage.jsx 컴포넌트(마이페이지 회원정보)
 
 ```javascript
-    const nav = useNavigate();
-    const id = sessionStorage.getItem("mid");
-  
-    useEffect(() => {
-        // const mid = sessionStorage.getItem("mid");
 
-        if(id === null){
-            alert("로그인 후 가능한 기능입니다");
-            nav("/");
-            // return;
+const Mypage = () => {
+  const nav = useNavigate();
+  const id = sessionStorage.getItem("mid");
+  console.log(id)
+
+ 
+
+  useEffect(() => {
+
+    if(id === null || id === ""){
+        alert("로그인 후 가능한 기능입니다");
+        nav("/");
+        // return;
+    }
+  });
+  
+
+  const modify= () => {
+    nav('/member/edit')
+  }
+  
+  const { userInfo } = useAuth()
+
+  const onSubmitHandler = (e) => {
+    e.preventDefault()
+  }
+  const remove=() => {
+    // console.log(remove);
+    let confirm = window.confirm('회원 탈퇴하시겠습니까?');
+    if(confirm === true) {
+      axios
+      .post('/resignMy', userInfo)
+      .then(res => {
+        console.log(res);
+  
+        if(res.data === 'Ok'){
+          window.alert('정상적으로 탈퇴되었습니다.');
+          sessionStorage.removeItem("mid");
+          sessionStorage.removeItem("grade");
+          nav('/');
+        }else {
+          window.alert('탈퇴에 실패하였습니다.');
         }
-    })
-
-    const [board, setBoard] = useState({
-        btitle : "",
-        bstr : "",
-        bpwd : "",
-        btype : "serviceCenter",
-        // member : {mid : id}
-        bmid : id,
-    })
-  
-    const onch = useCallback(e => {
-        const formObj = {
-          ...board,
-          [e.target.name] : e.target.value,
-        };
-        setBoard(formObj);
-        console.log(formObj);
-    }, [board]);
-  
-    const onWrite = (e) => {
-        e.preventDefault();
-
-        axios
-            .post("/serviceCenterWrite" , board)
-            .then((res) => {
-                console.log(res.data);
-                if(res.data === "성공"){
-                    alert("게시글이 작성되었습니다.");
-                    nav(-1);
-                }
-            })
-            .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+    } else {
+      window.alert('취소되었습니다.');
     }
-    return (
-        <>
-        <Header/>
-        <div data-aos="fade-up">
-        <Section style={{width : "55%"}}>
-            <div style={Main}>
-            <span style={{display : "block", textAlign : "center", fontSize : "50px", padding : "0"}}>문의하기</span>
-            <form style={Content} onSubmit={onWrite}>
-                    <input style={Input} onChange={onch} name="btitle" placeholder="제목을 입력하세요." autoFocus required />
-                    <textarea style={Textarea} onChange={onch} name="bstr" onScroll placeholder="게시글을 작성하세요." required/>
-                    <input style={Input} onChange={onch} name="bpwd" placeholder="게시글 비밀번호를 입력하세요." required />
-                <div style={Buttons}>
-                    <Button type="submit" wsize="s-30" style={{width : "150px" , marginRight:"10px", backgroundColor : "#C9A3B6"}}>작성하기</Button>
-                    <Button type="button" wsize="s-10" color="gray" onClick={() => nav(-1)} 
-                        style={{width: "150px", backgroundColor : "#D3D3D3", fontSize : "18px"}}>취소하기</Button>
-                </div>
-            </form>    
-            </div>
-        </Section>
-        </div>
-        <Footer />
-        </>
-    );
+  
+  }
+
+  return (
+    <form style={{margin:'0 auto' ,width: '70%' }} onSubmit={onSubmitHandler}>
+      <Stack style={{ width: '100%' }}>
+        <InputGroup label="아이디">
+          <Input style={{border: 0}} type="text" value={userInfo.mid} readOnly />
+        </InputGroup>
+        <InputGroup label="성함">
+          <Input style={{border: 0}} type="text" value={userInfo.mname} readOnly />
+        </InputGroup>
+        <InputGroup label="이메일">
+          <Input style={{border: 0}} type="text" value={userInfo.memail} readOnly/>
+        </InputGroup>
+        <InputGroup label="연락처">
+          <Input style={{border: 0}} type="text" value={userInfo.mphone} readOnly />
+        </InputGroup>
+        <InputGroup label="주소">
+          <Input style={{border: 0}} type="text" value={userInfo.maddr} readOnly />
+        </InputGroup>
+        <InputGroup label="상세주소">
+          <Input style={{border: 0}} type="text" value={userInfo.mdaddr} readOnly />
+        </InputGroup>
+        <FlexBox gap={30} style={{ width: '500px', margin: '0 auto' }}>
+          <Button onClick={modify} style={{ flex: 1 }}>수정하기</Button>
+          <Button onClick={remove} style={{ flex: 1 }}>탈퇴하기</Button>
+        </FlexBox>
+      </Stack>
+    </form>
+  )
 }
+export default Mypage;
 ```
-상담문의게시판에서 글쓰기를 누르면 이 컴포넌트로 이동합니다. 문의게시판 특성 상 1:1문의를 원칙으로 해 게시글 비밀번호까지 써야 작성이 가능합니다.
+로그인을 한 후에 페이지 우측 상단의 '마이페이지' 버튼을 누르면 보이는 기본 마이페이지로 회원정보를 확인할 수 있고, '수정하기' 버튼 클릭 시 회원정보 수정 카테고리로 이동되며, '탈퇴하기' 버튼 클릭 시 회원 알림창으로 다시 한번 확인 후 회원 정보를 삭제합니다.
 
-## Back_BoardController
+## Back_MemberController
 ```java
-    @PostMapping("serviceCenterWrite")
-    public String serviceCenterWrite(@RequestBody Board board){
-        log.info("serviceCenterWrite()");
-        return bServ.serviceCenterWrite(board);
+    public class MemberController {
+        @Autowired
+        private MemberService mServ;
+        // 마이페이지 내정보
+        @PostMapping("mypage")
+        public Member mypage(@RequestParam String mid) {
+            log.info("mypage()");
+            log.info("불러와 :" +mid);
+            Member member = mServ.mypage(mid);
+            log.info(member.toString());
+            return member;
+        }
+        
+        // 마이페이지 회원탈퇴
+        @PostMapping("resignMy")
+        public String resignMy(@RequestBody Member mem ){
+            log.info("resignMy()");
+            return mServ.removeMy(mem);
+        }
     }
 ```
-## Back_BoardService
+## Back_MemberService
 ```java
-    @Transactional
-    public String serviceCenterWrite(Board board) {
-        log.info("serviceCenterWrite()");
-        String msg = "";
+    @Service
+    @Log
+    public class MemberService {
+        @Autowired
+        MemberRepository mRepo;
+        // 마이페이지 내정보
+        public Member mypage(String mid) {
+            log.info("mypage()");
+            Member mem = new Member();
+            try {
+                mem = mRepo.findByMid(mid);
+                mem = mRepo.findById(mid).get();
 
-        try{
-            bRepo.save(board);
-            msg = "성공";
-        }catch (Exception e){
-            e.printStackTrace();
-            msg = "실패";
+                log.info(mem.toString());
+                mRepo.save(mem);
+                log.info("bb"+mem);
+                log.info("담았느냐");
+            }catch (Exception e) {
+                log.info("못담았느냐");
+                e.printStackTrace();
+            }
+                return mem;
+        }
+        
+            // 마이페이지 회원 탈퇴
+        public String removeMy(Member mem) {
+        log.info("removeMy()");
+        String msg = null;
+        try {
+            mRepo.delete(mem);
+            msg = "Ok";
+        } catch (Exception e){
+            msg = "fail";
         }
         return msg;
     }
+    }
+    
 ```
-작성한 내용을 데이터베이스에 save()함수를 이용해 insert 해줍니다.<br><br>
-#### 글쓰기 화면<br><br>
+프론트에서 넘어온 id 값을 통해 해당 유저의 정보들을 findby~를 사용하여 데이터베이스에서 찾아서 return 해줍니다.<br><br>
+#### 내 정보 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215292380-30bab833-913b-45cc-8107-675322ae2ab0.png)
 
-## ServiceCenterDetail.jsx 컴포넌트
+## 내 정보 수정
 
-※ 게시글 상세보기 ( 게시글 삭제(관리자만), 게시글 댓글 작성(관리자만), 게시글 댓글 삭제(관리자만) )
+※ PageCorrection.jsx 컴포넌트
 
 ```javascript
 
-const df = (date) => moment(date).format("YYYY-MM-DD HH:mm");
-const df2 = (date) => moment(date).format("YYYY-MM-DD");
+const PageCorrection= () => {
 
-const ServiceCenterDetail = () => {
-   
-    const nav = useNavigate();
-    const [board, setBoard] = useState({});
 
-    const grade = sessionStorage.getItem("grade");
-    const bn = localStorage.getItem("bno");
+const id = sessionStorage.getItem("mid");
 
-    const [comList, setComList] = useState({});
+const nav = useNavigate();
 
-    useEffect(() => {
-        const mid = sessionStorage.getItem("mid");
-        console.log(comList);
+const inputBoard = useRef();
+const borderCh = (e) => {
+  inputBoard.current.style.border = '1px solid lightgray';
+  inputBoard.current.style.background = 'white';
+  inputBoard.current = e.target
+  inputBoard.current.style.border = '1px solid black';
+  inputBoard.current.style.background = 'rgb(245,245,245)';
 
-        if(mid === null){
-            alert("로그인 후 가능한 기능입니다");
-            nav("/");
-            return;
-        }
-
-        // console.log(bn); //게시글번호
-
-        axios
-        .get("/ServiceCenterDetail", {params: {bno:bn, type:"serviceCenter"} })
-        .then((res) => {
-            // console.log(res);
-            // console.log(res.data);
-            setBoard(res.data);
-        })
-        .catch((err) => console.log(err));
-
-        axios
-        .get("ScommentList", {params : {mentbno:bn}})
-        .then((res) => {
-            // console.log(res.data);
-            setComList(res.data);
-            
-        })
-        .catch((err) => console.log(err));
-
-    }, []);
-
-    const [comment, setComment] = useState({
-        mentstr : "",
-        mentmid : grade,
-        mentbno : bn,
-    });
-
-    const {mentstr, mentmid, mentbno} = comment;
-
-    const onch = (e) => {
-        const Obj = {
-            ...comment,
-            [e.target.name] : e.target.value,
-        }
-        setComment(Obj);
-    };
-
-    const com = () => {
-        // console.log(comment);
-
-        if(comList == ""){
-            axios
-            .post("Swritecomment" , comment)
-            .then((res) => {
-                console.log(res.data);
-
-                const Obj = {
-                    mentstr : "",
-                    mentmid : grade,
-                    mentbno : bn,            
-                }
-                setComment(Obj);
-            })
-            .catch((err) => console.log(err));
-        }else{
-            alert("댓글은 최대 1개만 가능합니다.");
-                const Obj = {
-                    mentstr : "",
-                    mentmid : grade,
-                    mentbno : bn,            
-                }
-                setComment(Obj);
-        }
-        
-    }
-
-    const deleteComment = () => {
-        // e.preventDefault();
-
-        let confirm = window.confirm('삭제하시겠습니까?');
-        
-        if(confirm === true){
-            console.log(comList);
-
-            axios
-                .post("deleteComment", comList)
-                .then((res) => {
-                    console.log(res);
-                })
-                .catch((err) => console.log(err));
-        }
-    }
-
-    const SboardDel = () => {
-        let confirm = window.confirm("이 게시글을 삭제하시겠습니까?");
-
-        if(confirm === true){
-
-            if(comList == ""){
-                axios
-                .post("SboardDel", board)
-                .then((res) => {
-                    console.log(res.data);
-                    if(res.data == "게시글 삭제 성공"){
-                        alert("게시글이 삭제되었습니다.");
-                        nav("/ServiceCenter");
-                    }
-                })
-                .catch((err) => console.log(err));
-
-            }else {
-                axios
-                .post("SboardDel", board)
-                .then((res) => {
-                    console.log(res.data);
-                    if(res.data == "게시글 삭제 성공"){
-                        alert("게시글이 삭제되었습니다.");
-                        nav("/ServiceCenter");
-                    }
-                })
-                .catch((err) => console.log(err));
-
-                axios
-                .post("deleteComment", comList)
-                .then((res) => {
-                    console.log(res.data);
-                })
-                .catch((err) => console.log(err));
-
-            }
-        }
-    }
-
-    return (
-        <div>
-            <Header />
-            <EstimateBanner />
-            <Section>
-            <div className="SMain">
-                <form className="SContent">
-                    <div style={{marginTop:"-30px", marginBottom:"25px"}}>
-                        <input style={{width:"1000px", height:"45px"}} readOnly
-                        className="SInput" value={board.btitle}/>
-                        <div className="Sinfo">
-                            <span>NO.&nbsp;{board.bno}</span>
-                            <span style={{paddingLeft : "110px"}}>작성자 &nbsp;: &nbsp;{board.bmid}</span>
-                            <span>작성일 &nbsp;: &nbsp;{df(board.bdate)}</span>
-                        </div>
-                        <textarea style={{width: "1000px", height:"500px"}} onScroll readOnly
-                        className="STextarea" placeholder="내용" value={board.bstr}/>
-                    </div>
-                    {grade === "admin" ? (
-                        <div>
-                            <Button type="button" onClick={()=>nav("/ServiceCenter")} style={{width:"150px", height:"50px", marginLeft:"400px", backgroundColor : "#C9A3B6"}}>목록</Button>
-                            <Button type="button" onClick={SboardDel} style={{width:"150px", height:"50px", marginLeft:"300px"}}>게시글 삭제</Button>              
-                        </div>
-                    ) : (<Button type="button" onClick={()=>nav("/ServiceCenter")} style={{width:"150px", height:"50px", backgroundColor : "#C9A3B6"}}>목록</Button>)}
-                </form>
-                <form className="SContent">
-                    <div style={{marginTop:"20px", display:"flex"}}>
-                        {grade === "admin" ? (
-                            <>
-                                <input className="Sinputdiv" name="mentstr" value={mentstr} onChange={onch} />
-                                <Button style={{width:"150px", height:"55px", backgroundColor : "#C9A3B6"}} onClick={com}>작성하기</Button>
-                            </>
-                        ) : (
-                            <>
-                                <input className="Sinputdiv" name="mentstr" readOnly placeholder="관리자만 쓸 수 있는 댓글입니다."/>
-                                <Button style={{width:"150px", height:"55px",backgroundColor : "#C9A3B6"}} onClick={(e) => {e.preventDefault(); alert("관리자만 쓸 수 있는 댓글입니다.")}}>작성하기</Button>
-                            </>
-                        )}
-                    </div>
-                    {comList !== "" ? (
-                    <div className="Sdivdiv">
-                        <div className="Sdivbtn">
-                            <div>
-                                <span>관리자</span>
-                            </div>
-                            <div>
-                                <span style={{marginRight:"15px"}}>{df2(comList.mentdate)}</span>
-                                {grade === "admin" ? (<button style={{border:"none", background:"none", fontSize:"17px", color:"red", cursor:"pointer"}} onClick={deleteComment}>삭제하기</button>) : (null)}
-                            </div>
-                        </div>
-                        <input className="Sinputre" value={comList.mentstr} />
-                    </div>
-                    ) : (
-                    <div className="Sdivdiv">
-                        <input className="Sinputre" style={{textAlign:"center"}} placeholder="댓글이 존재하지 않습니다." readOnly />
-                    </div>
-                    )}
-                </form>
-            </div>
-            </Section>
-            <Footer />
-        </div>
-    );
 }
-export default ServiceCenterDetail;
-```
-게시글 전체보기 화면에서 글 제목을 클릭했을 때 이동되는 상세페이지 컴포넌트입니다. 클릭한 글의 번호를 localStorage에 저장 후 해당하는 글의 상세페이지로 이동합니다. 클릭 시에 sessionStorage에서 grade값을 가져와 관리자인 경우에는 상세페이지 이동, 일반회원일 때는 글의 비밀번호를 작성해 일치할때만 이동하게 합니다. 1:1상담 게시판이기 때문에 댓글은 관리자만 달 수 있고 관리자일 경우에만 회원 게시글 삭제와 관리자 댓글을 삭제할 수 있게 했습니다.
 
-- #### 해당 게시글 상세정보 가져오기
-## Back_BoardController 
+const [userInfo, setUserInfo] = useState({})
+const [data, setData] = useState({
+  
+});
+const [a, setA] = useState('');
+useEffect(()=> {
+  const id = sessionStorage.getItem("mid");
+
+    axios
+    .post("/mypage", null,{params:{mid:id}})
+    .then((res)=> {
+      console.log(res.data)
+      setUserInfo(res.data);
+      setData(res.data)
+    })
+    .catch((err)=> console.log(err));
+  
+  console.log(userInfo)
+  //setA(userInfo.maddr);
+},[])
+
+// console.log(data)
+
+const onch = useCallback(
+  (e) => {
+    if(a === '') {
+      console.log(a)
+      setA(data.maddr)
+    }
+    //setA()
+    let newData = {
+      ...data,
+      mpwd : '',
+      maddr:a,
+      [e.target.name]: e.target.value,      
+    }
+
+    console.log(newData)
+    setData(newData)
+  },[data]
+);
+
+const pwdRegExp = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/;
+
+const onWrite = useCallback(
+  (e) => {
+    e.preventDefault();
+    console.log(id);
+    console.log(data)
+    
+      if(!pwdRegExp.test(data.mpwd)&&data.mpwd!==""){
+        window.alert('숫자+영문자+특수문자 조합으로 8자리 이상 입력해주세요!')
+        return;
+      }else if(pwdRegExp.test(data.mpwd)||data.mpwd===""){
+        axios
+        .post("/updateMy", data)
+        .then((res)=>{
+      console.log(res.data);
+      if(res.data === '수정 성공'){
+        window.alert('수정되었습니다.');
+        sessionStorage.removeItem('myPage')
+        console.log(data.mpwd)
+        
+        nav('/member/mypage');
+        
+      } else{
+        window.alert("수정 실패");
+        console.log(data.mpwd)
+        
+      }
+    }).catch((err) => console.log(err));
+    }    
+  }, 
+);
+
+const cancle = () => {
+  window.alert('취소되었습니다.')
+  nav('/member/mypage');
+}
+
+
+// 팝업창 상태 관리
+const [isPopupOpen, setIsPopupOpen] = useState(false)
+
+// 팝업창 열기
+const openPostCode = () => {
+  setIsPopupOpen(true)
+}
+
+// 팝업창 닫기
+const closePostCode = (v) => {
+  setIsPopupOpen(false)
+  console.log(v)
+  //console.log(a)
+  console.log(data)
+    let newData = {
+      ...data,
+      maddr: v,  
+    }
+
+    console.log(newData)
+    setData(newData)
+}
+
+  return (
+    <form style={{ margin:'0 auto' ,width: '70%' }} onSubmit={()=>{onWrite()}}>
+    <Stack style={{ width: '100%' }}>
+      <InputGroup label="아이디">
+        <Input style={{border: 0}} type="text" value={userInfo.mid} readOnly />
+      </InputGroup>
+      <InputGroup label="성함">
+        <Input type="text" name='mname' ref={inputBoard} onClick={(e)=>borderCh(e)} onChange={(e)=>{onch(e)}} defaultValue={userInfo.mname} />
+      </InputGroup>
+      <InputGroup label="비밀번호">
+        <Input type="password" name='mpwd' ref={inputBoard} onClick={(e)=>borderCh(e)} onChange={(e)=>{onch(e)}} />
+      </InputGroup>
+      <InputGroup label="이메일">
+        <Input
+          type="text" name='memail' ref={inputBoard} onClick={(e)=>borderCh(e)} onChange={(e)=>{onch(e)}} defaultValue={userInfo.memail} />
+      </InputGroup>
+      <InputGroup label="연락처">
+        <Input
+          type="text" name='mphone' ref={inputBoard} onClick={(e)=>borderCh(e)} onChange={(e)=>{onch(e)}} defaultValue={userInfo.mphone}  />
+      </InputGroup>
+      <InputGroup label="주소">
+        <TextArea style={{overflow:'hidden', lineHeight:'25px', textAlign:'left'}}
+          className="Input" type="text" value={a} name="maddr" 
+          required defaultValue={userInfo.maddr} onClick={() => openPostCode()} ref={inputBoard}
+           />
+        </InputGroup>
+        <InputGroup label="상세 주소">
+         <Input 
+            type="text" name="mdaddr" ref={inputBoard} onClick={(e)=>borderCh(e)} onChange={(e)=>{onch(e)}} defaultValue={userInfo.mdaddr}
+           />
+        {/* <TextArea name='maddr'  onChange={(e)=>{onch(e)}} defaultValue={userInfo.maddr}  /> */}
+      </InputGroup>
+      <FlexBox gap={30} style={{ width: '500px', margin: '0 auto' }}>
+        <Button onClick={(e)=>{onWrite(e);} }  style={{ flex: 1 }}>수정완료</Button>
+        <Button onClick={cancle} style={{ flex: 1 }}>수정취소</Button>
+        {/* 클릭 시 팝업 생성 */}
+      {/* 팝업 생성 기준 div */}
+      <div id="popupDom">
+        {isPopupOpen && (
+          <PopAddDom>
+            <PopAddPostCode onClose={closePostCode} setA={setA} />
+          </PopAddDom>
+        )}
+      </div>
+      </FlexBox>
+    </Stack>
+  </form>
+  
+  )
+}
+export default PageCorrection;
+```
+마이페이지 화면에서 '내 정보 수정' 버튼을 클릭했을 때 이동되는 컴포넌트입니다. Session에 저장돼 있는 로그인 아이디를 사용하여 유저의 이름, 비밀번호, 이메일, 연락처, 주소를 변경 할 수 있습니다. 주소 변경에서는 카카오 주소 api를 활용 했습니다.
+
+## Back_MemberController 
 ```java
-    @GetMapping("ServiceCenterDetail")
-    public Board ServiceCenterDetail(@RequestParam int bno, String type){
-        log.info("ServiceCenterDetail()");
-        return bServ.ServiceCenterDetail(bno, type);
+    // 마이페이지 정보수정
+    @ResponseBody
+    @PostMapping("updateMy")
+    public String updateMy(@RequestBody Member mem){
+        log.info("updateMy()");
+        return  mServ.updateMy(mem);
     }
 ```
-## Back_BoardService
+## Back_MemberService
 ```java
-    public Board ServiceCenterDetail(int bno, String type) {
-        log.info("ServiceCenterDetail()");
-        Board board = null;
-
-        try{
-            board = bRepo.findByBnoAndBtype(bno,type);
-            log.info("board 값 : " + board);
-
-        }catch (Exception e){
-            e.printStackTrace();
-            board = null;
-        }
-        return board;
-    }
-```
-
-- #### 해당 게시글 댓글 달기(관리자만)
-## Back_BoardController 
-```java
-    @PostMapping("Swritecomment")
-    public String Swritecomment(@RequestBody Comment comment){
-        log.info("Swritecomment()");
-        return bServ.Swritecomment(comment);
-    }
-```
-## Back_BoardService
-```java
-    public String Swritecomment(Comment comment) {
-        log.info("Swritecomment()");
-        String msg = "";
-
+// 마이페이지 정보수정
+    public String updateMy(Member mem) {
+        log.info("updateMy()");
+        Member mData = null;
+        String msg =null;
         try {
-            cRepo.save(comment);
-            msg = "성공";
-        }catch (Exception e){
+            mData = mRepo.findById(mem.getMid()).get();
+            log.info("ㅠㅠ" + mem.getMpwd());
+            log.info("흐악ㅇㄱㅇㄱㅇ"+mem);
+
+            if(mem.getMpwd()!="") {
+                String epwd = encoder.encode(mem.getMpwd());
+                mData.setMpwd(epwd);
+            }
+            if(mem.getMname()!="") {
+                mData.setMname(mem.getMname());
+            }
+            if(mem.getMemail()!="") {
+                mData.setMemail(mem.getMemail());
+            }
+            if(mem.getMphone()!="") {
+                mData.setMphone(mem.getMphone());
+            }
+            if(mem.getMaddr()!="") {
+                mData.setMaddr(mem.getMaddr());
+            }
+            if(mem.getMdaddr()!="") {
+                mData.setMdaddr(mem.getMdaddr());
+            }
+//
+            mRepo.save(mData);
+            msg ="수정 성공";
+        } catch (Exception e){
             e.printStackTrace();
-            msg = "실패";
+            msg = "수정 실패";
         }
         return msg;
     }
 ```
-- #### 해당 게시글 댓글 출력
-## Back_BoardController 
-```java
-    @GetMapping("ScommentList")
-    public Comment ScommentList(@RequestParam int mentbno){
-        log.info("ScommentList()");
-        return bServ.ScommentList(mentbno);
-    }
-```
-## Back_BoardService
-```java
-    public Comment ScommentList(int mentbno) {
-        log.info("ScommentList()");
-        Comment comment = null;
 
-        try{
-            comment = cRepo.findByMentbno(mentbno);
+## Likes.jsx(마이페이지 찜목록) 
+```javascript
+    export default () => {
+      const comma = (num) =>[num].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      const id = sessionStorage.getItem("mid");
+      const nav = useNavigate();
+        const inputBorder= useRef();
+      const [dibData,setDibData] = useState([{}]);
+      useEffect(()=>{
+        axios.post("/searchDib", null, {params:{mid:id}})
+        .then((res)=>{
+          console.log(res.data);
+          setDibData(res.data);
+        })
+      },[])
 
-        }catch (Exception e){
-            e.printStackTrace();
+      const [likes, setLikes] = useState([
+        // {name: "gd"},
+        // {name: "gd"},
+        // {name: "gd"},
+      ])
+      console.log(dibData);
+      const {wh,sd,pl,ho} = dibData;
+      useEffect(()=>{
+        console.log(wh);
+        let ls = [];
+        if(wh!==undefined){
+          for(let i=0; i<wh.length; i++){
+            ls.push({dname: wh[i].whname, dtype: "웨딩홀", dprice: wh[i].whprice ,dwhidx:wh[i].whidx, dmid:id, bprice: wh[i].bprice ,dorder: i});
+            setLikes(ls);
+          }
+        }
+          if(sd!==undefined){
+            for(let i=0; i<sd.length; i++){
+              ls.push({dname: sd[i].scomp, dtype: "스드메", dprice: sd[i].sprice ,dsidx:sd[i].sidx, dmid:id, dorder: wh.length+i,});
+              setLikes(ls);
+            }
+          }
+          if(pl!==undefined){
+            for(let i=0; i<pl.length; i++){
+              ls.push({dname: pl[i].pname, dtype: "플래너", dprice: pl[i].pprice ,dpidx:pl[i].pidx, dmid:id, dorder: wh.length+sd.length+i,});
+              setLikes(ls);
+            }
+          }
+          if(ho!==undefined){
+            for(let i=0; i<ho.length; i++){
+              ls.push({dname: ho[i].hlocation, dtype: "허니문", dprice: ho[i].hcost ,dhidx:ho[i].hidx, dmid:id, dorder: wh.length+sd.length+pl.length+i,});
+              setLikes(ls);
+            }
+          }
+      },[wh],[sd],[pl],[ho]);
+      // console.log({a})
+      // likes.concat();
+      // for(let i=1; i<3; i++){
+      //   likes.concat({name: dd[i]});
+      // }
+      // console.log(likes)
+      const [delData, setdelData] = useState([]);
+      const [delbtn, setDelbtn] = useState(false);
+
+      // const onRemoveHandler = (id) => () => {
+      //   if (!window.confirm(`${likes[id].name} 을 찜 목록에서 삭제하시겠습니까?`)) return
+
+
+      // }
+      const [showData,setShowData]=useState([]);;
+      useEffect(()=>{
+        let tempShow = []
+        console.log(likes);
+        tempShow=likes.slice();
+        console.log(tempShow)
+          for(let i =0; i<tempShow.length; i++){
+            tempShow[i]={...tempShow[i], dprice:comma(tempShow[i].dprice)}
+        }
+        setShowData(tempShow);
+        console.log(showData);
+      },[likes])
+
+
+      useEffect(()=>{
+        console.log("여기요오오"+delData);
+        if(delbtn===true){
+          axios.post("/deleteDib", delData)
+          .then((res)=>{
+            window.alert("힝 삭제됐어");
+            setDelbtn(false);
+            nav(0);
+          });  
         }
 
-        return comment;
+
+        //버튼누를때 유즈스테이트 하나 바뀌게해서 만약에 그값이 바뀌면 axios 보낸다 해주면될듯
+      },[delData,delbtn]);
+
+      const [checkall,setCheckall] = useState(false);
+      const [checkList, setCheckList] = useState([]);
+      // useEffect(()=>{
+      //   console.log(delData,checkall);
+      // },[delData,checkall])
+      let tempdelData = [];
+      let tempcheckList = [];
+      let tempallData= [];
+      const onCheckboxChangeHandler = (e,index) => {
+        console.log(checkList.length, likes.length);
+        console.log(index);
+        if (e.target.name!=="rperson" && e.target.name!=="rdatestart" && e.target.name!=="rdateend"){
+          const val = Number(e.target.value)
+          setCheckList(checkList.includes(val) ? checkList.filter((v) => v !== val) : [...checkList, val])
+          console.log(val);
+          console.log(checkList);
+          {val ===-1&&checkall===false ? setCheckall(true): setCheckall(false)};
+          if(val===-1&&delData.length!==likes.length){
+            setCheckList([]);
+            setdelData([]);
+            setdelData(likes);
+            console.log("제바아아알")
+            console.log(delData);
+            return;
+          }else if(val===-1){
+            // setCheckList(checkList.filter(v=> v !== val));
+            setCheckall(false);
+            setdelData([]);
+            console.log(delData);
+            return;
+          }else if (val!==-1&&delData.length===likes.length){
+            setCheckall(false);
+            console.log(delData);
+            console.log(checkList);
+            for(let i = 0 ; i<likes.length; i++){
+              tempcheckList.push(i);
+            }
+            tempcheckList.splice(val,1);
+            setCheckList(tempcheckList);
+            tempallData = delData.slice();
+            tempallData.splice(val,1);
+            setdelData(tempallData);
+            return;
+          }
+
+
+
+
+          console.log(e.target.checked,checkall)
+          console.log(likes[e.target.value].dtype, e.target.checked, checkall)
+          if(likes[e.target.value].dtype==="웨딩홀"&&e.target.checked===true &&checkall===false){
+            setdelData([...delData,{
+              dtype:"웨딩홀",
+              dmid:id,
+              dwhidx:likes[e.target.value].dwhidx,
+              dprice:likes[e.target.value].dprice,
+              dname:likes[e.target.value].dname,
+              dorder: index,
+              bprice: likes[e.target.value].bprice
+          }])}else if(likes[e.target.value].dtype==="웨딩홀"&&e.target.checked===false &&checkall===false){
+            setdelData(delData.filter(delData=>delData.dwhidx!==likes[e.target.value].dwhidx))
+          }
+          if(likes[e.target.value].dtype==="스드메"&&e.target.checked===true &&checkall===false){
+            console.log(likes[e.target.value].dsidx);
+            setdelData([...delData,{
+              dtype:"스드메",
+              dmid:id,
+              dsidx:likes[e.target.value].dsidx,
+              dprice:likes[e.target.value].dprice,
+              dname:likes[e.target.value].dname,
+              dorder:index,
+          }])}else if(likes[e.target.value].dtype==="스드메"&&e.target.checked===false &&checkall===false){
+            setdelData(delData.filter(delData=>delData.dsidx!==likes[e.target.value].dsidx))
+          }
+          if(likes[e.target.value].dtype==="플래너"&&e.target.checked===true &&checkall===false){
+            console.log(likes[e.target.value].dpidx);
+            setdelData([...delData,{
+            dtype:"플래너",
+            dmid:id,
+            dpidx:likes[e.target.value].dpidx,
+            dprice:likes[e.target.value].dprice,
+            dname:likes[e.target.value].dname,
+            dorder:index,
+          }])}else if(likes[e.target.value].dtype==="플래너"&&e.target.checked===false &&checkall===false){
+            setdelData(delData.filter(delData=>delData.dpidx!==likes[e.target.value].dpidx))
+          }
+          if(likes[e.target.value].dtype==="허니문"&&e.target.checked===true &&checkall===false){
+            console.log(likes[e.target.value].dhidx);
+            setdelData([...delData,{
+            dtype:"허니문",
+            dmid:id,
+            dhidx:likes[e.target.value].dhidx,
+            dprice:likes[e.target.value].dprice,
+            dname:likes[e.target.value].dname,
+            dorder:index,
+          }])}else if(likes[e.target.value].dtype==="허니문"&&e.target.checked===false &&checkall===false){
+            setdelData(delData.filter(delData=>delData.dhidx!==likes[e.target.value].dhidx))
+          }
+        }
+
+
+        if (e.target.name==="rperson" || e.target.name==="rdatestart" || e.target.name==="rdateend"){
+          tempdelData=delData.slice();
+          // console.log(delData.findIndex(d=>d.dorder===index));
+          if(tempdelData.length!==0 &&e.target.name==="rperson"){
+          tempdelData[delData.findIndex(d=>d.dorder===index)]={...tempdelData[delData.findIndex(d=>d.dorder===index)],[e.target.name]:parseInt(e.target.value)};
+          setdelData(tempdelData);
+          } else if(tempdelData.length!==0 &&e.target.name!=="rperson"){
+            tempdelData[delData.findIndex(d=>d.dorder===index)]={...tempdelData[delData.findIndex(d=>d.dorder===index)],[e.target.name]:e.target.value};
+            setdelData(tempdelData);
+            }
+          console.log(tempdelData);
+          console.log(index);
+          console.log(checkall)
+        }
+      }
+
+      const borderChange = (e)=> {
+        inputBorder.current.style.border="1px solid lightGray";
+        inputBorder.current = e.target;
+        inputBorder.current.style.border="1px solid black";
+      }
+      const personRegExp = /^[0-9]{0,4}$/;
+      const dataConfirm= (e) =>{
+        if(!personRegExp.test(inputBorder.current.value)){
+          window.alert("0명 이상 입력해주세요");
+          inputBorder.current.value="";
+        }
+      }
+      console.log(delData);
+      return (
+        <div style={{ width: '100%' }}>
+          <Table
+            columns={[
+              {
+                name: checkall === false ? <input type="checkBox" checked={false} value={-1} onChange={(e)=>onCheckboxChangeHandler(e)}/>:<input type="checkBox" checked={true} value={-1} onChange={(e)=>onCheckboxChangeHandler(e)}/>,
+                render: (v, index) => (
+                  checkall === true ? <input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)} checked/> : checkall === false && checkList.indexOf(index) !== -1 ? <input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)} checked/>:<input type="checkbox" value={index} onChange={(e)=>onCheckboxChangeHandler(e,index)}/>
+                ),
+              },
+              {
+                name: '등록번호',
+                render: (v, index) => index + 1,
+                style: {
+                  width: 80,
+                },
+              },
+              {
+                name: '타입',
+                id: 'dtype',
+              },
+              {
+                name: '상품명',
+                id: 'dname',
+              },
+              {
+                name: '예약일 선택',
+                render: (v,index) => ( checkall===false ?( likes[index].dtype !== "허니문" && checkList.indexOf(index) === -1 ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}} disabled/> : likes[index].dtype !== "허니문" && checkList.indexOf(index) !== -1 ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}}/> : checkList.indexOf(index) === -1 ? <><input type="date" disabled onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' disabled onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></> :  <><input type="date" onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></>)
+                :( likes[index].dtype !== "허니문" ? <input type="date" name="rdatestart" onChange={(e)=>onCheckboxChangeHandler(e, index)} style={{width:"300px", fontSize:"16px", textAlign:"center", border:"none"}}/> : <><input type="date" onChange={(e)=>onCheckboxChangeHandler(e,index)} name="rdatestart" style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/><span> ~ </span><input type="date" name='rdateend' onChange={(e)=>onCheckboxChangeHandler(e,index)} style={{width:"150px",fontSize:"16px", textAlign:"center", border:"none"}}/></>)),
+                id: 'selectRdate',
+              },
+              {
+                name: '1인 식대',
+                render: (v,index) => likes[index].dtype === "웨딩홀"?<div type="text" name="bprice" style={{width:"50px", textAlign:"center"}}>{likes[index].bprice} 만원</div>: null,
+                id: 'bprice',
+              },
+              {
+                name: '인원 선택',
+                render: (v,index) => ( checkall===false ?( likes[index].dtype === "웨딩홀" && checkList.indexOf(index) === -1 ?<><input type="text" disabled ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></> : likes[index].dtype === "웨딩홀" && checkList.indexOf(index) !== -1 ?  <><input type="text" ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></>:null)
+                : ( likes[index].dtype === "웨딩홀" ?  <><input type="text" ref={inputBorder} onClick={(e)=>borderChange(e)} onChange={(e)=>{onCheckboxChangeHandler(e,index);dataConfirm(e)}} name="rperson" maxLength="4" style={{width:"50px", border:"1px solid lightGray", textAlign:"center"}}/><label style={{color:"black", marginLeft:"10px"}}>명</label></>:null)),
+                id: 'selectPopu',
+              },
+              {
+                name: '가격',
+                render: (v,index) => likes[index].dtype === "웨딩홀" && (delData[delData.findIndex(d=>d.dorder===index)]?.rperson ===null || delData[delData.findIndex(d=>d.dorder===index)]?.rperson === undefined || delData[delData.findIndex(d=>d.dorder===index)]?.rperson === "")?<div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index]?.dprice} 만원</div>: likes[index].dtype === "웨딩홀"&&(checkList.indexOf(index) !==-1||checkall)&&(delData[delData.findIndex(d=>d.dorder===index)]?.rperson !==null || delData[delData.findIndex(d=>d.dorder===index)]?.rperson !==undefined || delData[delData.findIndex(d=>d.dorder===index)]?.rperson !== "") ?<div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index].dprice+delData[delData.findIndex(d=>d.dorder===index)].bprice*delData[delData.findIndex(d=>d.dorder===index)].rperson} 만원</div> : <div type="text" name="dprice" style={{width:"100px", textAlign:"right"}}>{likes[index].dprice} 만원</div>,
+                id: 'dprice',
+              },
+            ]}
+            dataSource={showData}
+          />
+          <div style={{float:"right", marginTop:'50px', width:200, display:"flex", justifyContent:"space-around"}}>
+            <Button onClick={()=>setDelbtn(true)}>선택삭제</Button>
+          <Payment ptext="결제하기" pData={delData} />
+          </div>
+        </div>
+      )
     }
 ```
+체크박스를 사용하여 체크된 상품들만 input태그의 disabled를 풀어주고 해당 상품에 필요한 옵션을 작성할 수 있고, 작성하지 않고 '결제하기' 버튼을 클릭 시 작성해달라는 경고창이 나타납니다. 체크한 상품들의 가격이 우측에 나오고, 옵션 작성으로 인한 가격 변동은 실시간으로 반영됩니다. 여러 상품을 선택하고 '결제하기'버튼을 클릭 시 결제 모듈이 나타나며 첫번째 상품의 이름과 함께 'xxx외 x건'으로 몇 건의 상품을 결제하는지가 모듈에 상품명으로 등록되어있고, 가격은 총 합산 가격으로 결제가 진행됩니다. 백은 결제에서 사용한 함수를 그대로 사용하였습니다.
+
 - #### 해당 게시글 댓글 삭제(관리자만)
 ## Back_BoardController 
 ```java
