@@ -4120,7 +4120,7 @@ export default CommuBoardWr;
 ![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
 
 
-## Commuboarddetail.jsx 컴포넌트
+## Commuboardetail.jsx 컴포넌트
 ※ 게시판 상세보기
 ```javascript
 const df = date => moment(date).format('YYYY-MM-DD HH:mm:ss')
@@ -4451,7 +4451,7 @@ export default CommuBoardDetail
 
 
 ## CommuBoardUp.jsx 컴포넌트
-※ 게시판 작성
+※ 게시판 
 ```javascript
 const CommuBoardUp = () => {
 // const CommuBoardWr = ({handleList}) => {
@@ -4702,24 +4702,91 @@ export default CommuBoardUp;
     }
 ```
 
+## CommuBoardDetail.jsx 컴포넌트
+※ 게시판 삭제
+```javascript
+const deleteBoard = ()=>{
+    console.log(deleteBoard);
+
+    let confirm = window.confirm('삭제하시겠습니까?');
+    if(confirm === true){
+        axios
+        .get('/deleteProc', {params:{bno:bn}})
+        .then(res => {
+
+            console.log(res);
+
+            if(res.data === 'Ok'){
+                window.alert("삭제되었습니다.");
+                nav(-2);
+            } else {
+                window.alert('삭제실패하였습니다.');
+            }
+        })
+        .catch(err => window.alert(err))
+    } else{
+        window.alert('취소되었습니다.');
+    }
+}
+```
+
+#### 공지사항 삭제 화면 <br><br>
+<img width="506" alt="게시글 삭제" src="https://user-images.githubusercontent.com/117880554/224956224-b94f4b7a-5806-4f19-bbaa-7326478bf698.png">
 
 
+## Back_BoardController
+```java
+    // 게시글 삭제
+    @GetMapping("deleteProc")
+    public String deleteProc(@RequestParam int bno, HttpSession session){
+        log.info("deleteProc()");
+        log.info("보드"+bno);
+        return bServ.deleteBoard(bno, session);
+    }
+```
+## Back_BoardService
+```java
+    // 게시글 삭제
+    @Transactional
+    public String deleteBoard(int bno, HttpSession session) {
+        log.info("deleteBoard()");
+        String msg = null;
+//        Board board = new Board();
+//        board.setBno(bno);
+//        board.setBno(board.getBno());
 
+        log.info("ㅠㅜㅠㅜㅠㅜ:" + bno);
 
+        String realPath = session.getServletContext().getRealPath("/");
+        realPath += "upload/";
 
+        List<Files> bfList = bfRepo.findByFid(bno);
+        try {
+            // 파일삭제
+            for (Files bf : bfList){
+                realPath += bf.getFsysname();
+                File file = new File(realPath);
 
+                if (file.exists()){
+                    file.delete();
+                }
+                // 파일 정보 삭제
+                fRepo.deleteByFid(bf.getFid());
+            }
+            // 댓글삭제
+            cRepo.deleteByMentbno(bno);
+            // 게시글 삭제
+            bRepo.deleteById(bno);
 
+            msg = "Ok";
+        } catch (Exception e){
+            e.printStackTrace();
+            msg = "fail";
+        }
 
-
-
-
-
-
-#### 공지사항 상세보기 화면_1<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294274-09444e9d-3881-4b0b-ab0f-5b435ebc5bdb.png)
-
-#### 공지사항 수정 화면_2<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294304-21a03e7f-78be-42c0-b50a-42bbfbecb028.png)
+        return msg;
+    }
+```
 
 ## JoinModal.jsx 컴포넌트
 
@@ -5104,16 +5171,54 @@ const JoinModal = ( props ) => {
 
 export default JoinModal;
 ```
-react-simple-chatbot 라이브러리를 이용해 자주 묻는 질문은 챗봇을 통해 대답하고 그 외의 질문은 버튼을 통해 상담문의게시판으로 이동하게 만들었습니다.
+정규화를 통해 회원가입 양식을 만들었고, 필수 입력사항들을 입력하지 않으면 회원가입 버튼이 비 활성화 됩니다. 주소입력란은 카카오 api를 사용했고 핸드폰 인증란은 아임포트 휴대폰 인증 api를 사용하였숩니다. 입력한 휴대폰번호와 이름이 휴대폰 인증 모듈에 전달되고 인증 완료 후에 휴대폰 번호 혹은 이름을 바꾸면 인증 내역이 해제됩니다. 
 
 #### 회원가입 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215295149-b59b4a7e-ca2f-4b0c-a3c2-6efb53d0f263.png)
+<img width="1106" alt="회원가입 창" src="https://user-images.githubusercontent.com/117880554/224960470-6422cb4c-b872-4306-9f20-07694167a144.png">
+
+#### 회원가입 정규화 화면<br><br>
+<img width="396" alt="회원가입 정규화" src="https://user-images.githubusercontent.com/117880554/224960500-9b380d1e-ee1a-41c5-b0c3-8c5d19226171.png">
+#### 회원가입 정규화 화면 1<br><br>
+<img width="391" alt="회원가입 정규화 2" src="https://user-images.githubusercontent.com/117880554/224960529-9bb817a8-0f33-4f63-814e-ba8a6e8e367e.png">
 
 #### 카카오 주소 api<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215295157-d921bf64-3243-4aed-a013-bad28517331d.png)
+<img width="331" alt="주소 api2" src="https://user-images.githubusercontent.com/117880554/224960551-82bdaaeb-0ab8-4192-8dc2-1ff98b7e0554.png">
 
-#### 아임포트 핸드폰 인증 api<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215295169-277858a8-70ee-46d1-ab66-3d6bf59d78ec.png)
+#### 아임포트 휴대폰 인증 api<br><br>
+<img width="263" alt="휴대폰 인증" src="https://user-images.githubusercontent.com/117880554/224962492-32715b7e-ad68-4e9d-9c8e-31fd7c0a5eab.png">
+
+
+
+## Back_MemberController
+```java
+    @PostMapping("/joinProc")
+    public String joinProc(@RequestBody Member member){
+        log.info("joinProc()");
+        String res = mServ.joinMember(member);
+        return res;
+    }
+```
+## Back_MemberService
+```java
+    @Transactional
+    public String joinMember(Member member) {
+        log.info("joinMember()");
+        String res = null;
+
+        String epwd = encoder.encode(member.getMpwd());
+        member.setMpwd(epwd);
+        try{
+            if(member.getMid()!=""){
+            mRepo.save(member);
+            res="ok";}else{res="아이디를입력하세요";}
+        }catch(Exception e){
+            e.printStackTrace();
+            res="failed";
+        }
+        return res;
+    };
+```
+
 
 마치며
 ---
