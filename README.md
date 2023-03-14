@@ -3146,357 +3146,1314 @@ export default PageCorrection;
 ```
 체크박스를 사용하여 체크된 상품들만 input태그의 disabled를 풀어주고 해당 상품에 필요한 옵션을 작성할 수 있고, 작성하지 않고 '결제하기' 버튼을 클릭 시 작성해달라는 경고창이 나타납니다. 체크한 상품들의 가격이 우측에 나오고, 옵션 작성으로 인한 가격 변동은 실시간으로 반영됩니다. 여러 상품을 선택하고 '결제하기'버튼을 클릭 시 결제 모듈이 나타나며 첫번째 상품의 이름과 함께 'xxx외 x건'으로 몇 건의 상품을 결제하는지가 모듈에 상품명으로 등록되어있고, 가격은 총 합산 가격으로 결제가 진행됩니다. 백은 결제에서 사용한 함수를 그대로 사용하였습니다.
 
-- #### 해당 게시글 댓글 삭제(관리자만)
-## Back_BoardController 
-```java
-    @PostMapping("deleteComment")
-    public String deleteComment(@RequestBody Comment comment){
-        log.info("deleteComment()");
-        return bServ.deleteComment(comment);
-    }
-```
-## Back_BoardService
-```java
-    public String deleteComment(Comment comment) {
-        log.info("deleteComment()");
-        String msg = "";
-
-        try {
-            cRepo.delete(comment);
-            msg = "성공";
-        }catch (Exception e){
-            e.printStackTrace();
-            msg = "실패";
-        }
-
-        return msg;
-    }
-```
-
-#### 회원이 본인 글 확인할 때<br><br>
+#### 찜목록 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
+#### 결제 모듈<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
 
-#### 관리자가 회원 글 확인할 때<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215292887-60fa539a-a17b-4a2b-a565-99c30033d526.png)
-
-## WedNews.jsx 컴포넌트
-
-※ 웨딩 뉴스 ( 글쓰기와 상세보기는 위의 상담게시판과 많이 겹쳐 코드를 제외했습니다 )
+## Reservation.jsx(마이페이지 예약 확인)
 ```javascript
+    export default () => {
+      const id = sessionStorage.getItem("mid");
+      const nav = useNavigate();
+      const [reservData, setReservData] = useState([]);
+      const [reserv, setReserv]= useState([]);
+      const [refundData, setRefundData]=useState({});
+      const [delReserv, setDelReserv]=useState();
+      const [a, setA]= useState(false);
+      let total =[];
+      let rList=[];
+      let temprlist =[];
+      useEffect(()=>{
+        axios.get("/myReservation",{params:{mid : id}})
+        .then((res)=>{
+          console.log(res.data);
+          setReservData(res.data);
+        }).catch((error)=>console.log(error));
+      },[])
 
-const df = (date) => moment(date).format("YYYY-MM-DD HH:mm");
-
-const WedNews = () => {
-    const nav = useNavigate();
-    let pnum = sessionStorage.getItem("pageNum");
-    const grade = sessionStorage.getItem("grade");
-
-    const [bitem, setBitem] = useState({});
-
-    const [flist, setFlist] = useState([
-        {
-          image: "",
-        },
-      ]);
-    
-
-    const { bdate, bfList, bmid, bno, bstr, btitle, btype } = bitem;
-
-    const [page, setPage] = useState({
-      totalPage: 0,
-      pageNum: 1,
-    });
-      
-    //게시글 목록을 서버로부터 가져오는 함수
-    const getList = (pnum) => {
-
-        axios
-        .get("/newsList", { params: { pageNum: pnum, type: "News" } })
-        .then((res) => {
-            console.log(res.data);
-            const { bList, totalPage, pageNum } = res.data;
-            setPage({ totalPage: totalPage, pageNum: pageNum });
-            setBitem(bList);
-            sessionStorage.setItem("pageNum", pageNum);
-        })
-        .catch((err) => console.log(err));
-
-        // console.log(bitem);
-        axios
-        .get("/newsListImg", { params : { type : "News" } })
-        .then((res) => {
-            console.log(res.data);
-
-            let prevFid = -1;
-
-            if (res.data.length > 0) {
-                let newFileList = [];
-                for (let i = 0; i < res.data.length; i++) {
-                    console.log(res.data[i]);
-                    if (res.data[i].fid === prevFid) continue;
-                    const newFile = {
-                        image: "upload/" + res.data[i].fsysname,
-                    };
-                    newFileList.push(newFile);
-                    prevFid = res.data[i].fid;
-                }
-                // console.log(newFileList);
-                setFlist(newFileList);
-            }
-        })
-        .catch((err) => console.log(err));
-    };
-
-    const getBoard = useCallback((bno) => {
-        //보여질 게시글 번호를 localStorage에 저장(글번호 유지를 위해)
-            localStorage.setItem("bno", bno);
-            nav("/WedNewsDetail");
-    }, []);
-
-    //main 페이지가 화면에 보일 때 서버로부터 게시글 목록을 가져온다.
-    useEffect(() => {
-        // pnum !== null ? getList(pnum) : getList(1);
-        getList(1);
-        } ,[]);
-
-    //출력할 게시글 목록 작성
-    let list = null;
-    if (bitem.length === 0) {
-        list = (<div>뉴스가 존재하지 않습니다.</div>);
-    } else {
-        list = Object.values(bitem).map((item) => (
-            <>
-                <div key={item.bno} style={{height:"180px",overflow:"hidden",}}>
-                    <h1 style={{cursor:"pointer"}} onClick={() => getBoard(item.bno)}>{item.btitle}</h1>
-                    <div style={{height:"90px",overflow:"hidden",marginTop:"5px",marginBottom:"5px",cursor:"pointer"}} onClick={() => getBoard(item.bno)}>{item.bstr}</div>
-                    <span>🐥 {item.bmid} 기자  ㅣ {df(item.bdate)}</span>
-                </div>
-                <hr/>
-            </>
-    ));
+      const {rw,rs,rp,rh} = reservData;
+      rList.push(rw);
+      rList.push(rs);
+      rList.push(rp);
+      rList.push(rh);
+      console.log(rList);
+      const inputReserv = rList;
+      console.log(inputReserv);
+      if(reservData.length!==0){
+      if(rw.length!==0){
+        for(let i=0; i<rw.length; i++){
+          temprlist.push(rw[i].whrList);
+        }
+      }
+      if(rs.length!==0){
+        for(let i=0; i<rs.length; i++){
+          temprlist.push(rs[i].srList);
+        }
+      }
+      if(rp.length!==0){
+        for(let i=0; i<rp.length; i++){
+          temprlist.push(rp[i].prList);
+        }
+      }
+      if(rh.length!==0){
+        for(let i=0; i<rh.length; i++){
+          temprlist.push(rh[i].hrList);
+        }
+      }
+      const trList = temprlist;
+      console.log(trList)
+      for(let i=0; i<trList.length; i++){
+        console.log(trList[i])
+        console.log(inputReserv)
+        switch(trList[i].rtype){
+          case "웨딩홀":
+            total.push({category :trList[i].rtype, name:inputReserv[0][i].whname, date:moment(trList[i].rdatestart).format('YYYY-MM-DD'), price:trList[i].rcost +" 만원", progress:trList[i].rstatus})
+            break;
+          case "스드메":
+            total.push({category :trList[i].rtype, name:inputReserv[1][i-rw.length].scomp, date:moment(trList[i].rdatestart).format('YYYY-MM-DD'), price:trList[i].rcost+" 만원", progress:trList[i].rstatus})
+            break;
+          case "플래너":
+            total.push({category :trList[i].rtype, name:inputReserv[2][i-rw.length-rs.length].pname, date:moment(trList[i].rdatestart).format('YYYY-MM-DD'), price:trList[i].rcost+" 만원", progress:trList[i].rstatus})
+            break;
+          case "허니문":
+            total.push({category :trList[i].rtype, name:inputReserv[3][i-rw.length-rs.length-rp.length].hlocation, date:(moment(trList[i].rdatestart).format('YYYY-MM-DD') +" ~ " + moment(trList[i].rdateend).format('YYYY-MM-DD')), price:trList[i].rcost+" 만원", progress:trList[i].rstatus})
+            break;
+          }
+          console.log(total);
+      }
+      console.log(total);
     }
+      useEffect(()=>{
+        setReserv(total);
+      },[reservData])
 
-    const viewFlist = flist.map((v, i) => {
-        console.log(v);
-        return (
-            <>
-                <div key={i} style={{height:"180px",marginTop:"3px", marginBottom:"-3px"}}>
-                {v.image && <img src={v.image} style={{width:"240px",height:"170px",cursor:"pointer"}} alt="preview-img" />}
-                </div>
-                <hr/>
-            </>
-        );
-      });
-    
-    const write = (e) => {
-        e.preventDefault();
-        nav("/WedNewsWrite");
+      const onRemoveHandler = (index) => () => {
+        if(temprlist[index].rstatus==="환불완료"){
+          alert("이미 환불된 건입니다.");
+          return;
+        }
+        let rconf=window.confirm("예약을 취소하시겠습니까?");
+        console.log("여기보세요");
+        console.log(temprlist[index].ridx);
+        console.log(temprlist[index].rimpuid);
+        console.log(temprlist[index].rcost);
+        console.log(temprlist[index].rstatus);
+        console.log(reserv[index].name);
+        if(rconf===true){
+        setRefundData({
+          imp_uid:temprlist[index].rimpuid,
+          cancel_request_amount:temprlist[index].rcost,
+          reason: "테스트 결제 환불", // 환불사유
+        });
+        setDelReserv({ridx:temprlist[index].ridx});
+      }
+        console.log(refundData);
+
+      }
+      console.log(refundData);
+        useEffect(()=>{
+          if(refundData.length===0){
+            return;
+          }
+          axios.post("/TokenRequest", refundData)  //환불전에 토큰받고 환불로이어짐
+          .then((res)=>{
+              console.log(res.data);
+              setRefundData([]);
+              setA(true);
+          }).catch((err)=>{console.log(err);setRefundData([]);})
+        },[refundData]);
+
+        useEffect(()=>{
+          console.log(delReserv);
+          if(a===true){
+            axios.post("/delReserv",delReserv)
+            .then((res)=>{
+              console.log("예약삭제?",res.data);
+              setA(false);
+              window.alert("예약이 취소되었습니다");
+              nav(0);
+            }).catch((err)=>{
+              console.log(err);
+              setA(false);
+            })
+          }
+        },[a]);
+
+      return (
+        <Table
+          columns={[
+            {
+              name: '예약 번호',
+              render: (v, index) => index + 1,
+              style: {
+                width: 80,
+              },
+            },
+            {
+              name: '예약 종류',
+              id: 'category',
+            },
+            {
+              name: '예약 명',
+              id: 'name',
+            },
+            {
+              name: '예약 날짜',
+              id: 'date',
+            },
+            {
+              name: '예약금',
+              id: 'price',
+            },
+            {
+              name: '진행 현황',
+              id: 'progress',
+            },
+            {
+              name: '확인/취소',
+              id: 'id',
+              render: (v, index) => (temprlist[index].rstatus === "진행예정" ? <Button onClick={onRemoveHandler(index)}>예약취소</Button>:<Button onClick={onRemoveHandler(index)} style={{background:"red"}}>환불완료</Button> ),
+              style: {
+                width: 200,
+              },
+            },
+          ]}
+          dataSource={reserv}
+        />
+      )
     }
-
-    return (
-            <div data-aos="fade-up">
-                <Section title="웨딩뉴스" style={{width:"1100px", height : "1880px", marginBottom:"-60px"}}>
-                    <div style={dv} >
-                        {grade === "admin" ? (<Button style={writeBtn} onClick={write}>뉴스 쓰기</Button>) : (null)}
-                    </div>
-                    <div style={{display:"flex", alignItems:"center", marginTop:"-500px", height:"1200px"}}>
-                        <div style={{marginRight:"10px", marginTop:"70px", height:"250px"}}>{viewFlist}</div>
-                        <div style={{marginTop:"70px", height:"250px", width:"850px"}}>{list}</div>
-                    </div>
-                    {/* <div style={{marginTop:"500px", width:"100%", height:"300px"}}>
-                        <Paging page={page} getList={getList} />
-                        <div style={dv} >
-                            {grade === "admin" ? (<Button style={writeBtn} onClick={write}>뉴스 쓰기</Button>) : (null)}
-                        </div>
-                    </div> */}
-                </Section>
-            </div>
-    );
-}    
-export default WedNews;
 ```
-사진을 불러오고 출력하는거 이외에는 상담문의게시판과 동일합니다. 뉴스 페이지가 처음 열렸을 때 데이터베이스의 file 테이블에서 type이 "News"인 파일만 가져옵니다. 각 게시글 앞에 대표사진 1개만 불러오기 위해 if문에 continue를 이용해 flist에 넣은 후 map()을 이용해 각 해당 뉴스와 뉴스에 맞는 대표사진을 출력합니다.
+결제가 완료된 상품들이 정렬되어 나타나고 해당 상품들의 정보와 진행상황이 나타납니다. '환불하기' 버튼 클릭 시 확인 경고창이 나타나고 환불 진행 시 실제로 환불처리가 되며 진행상황이 '환불완료'로 바뀌게 됩니다. 환불완료된 상품의 '환불하기' 버튼 클릭 시 이미 환불된 건이라는 알림창이 나타납니다. 백은 결제에서 사용한 함수를 그대로 사용하였습니다.
+
+#### 예약확인 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
+
+## CommuMain.jsx 컴포넌트
+※ 전체 게시판
+```javascript
+const CommuMain = () => {
+  const df = date => moment(date).format('YYYY- MM-DD HH:mm')
+    
+  const nav = useNavigate()
+  const mid = sessionStorage.getItem('mid')
+  // const grade = sessionStorage.getItem('grade');
+  let pnum = sessionStorage.getItem('pageNum')
+  // let bview = sessionStorage.getItem("bview");
+  const [bitem, setBitem] = useState({})
+  const [page, setPage] = useState({
+    totalPage: 0,
+    pageNum: 1,
+    btype: "",
+  })
+
+  const [bData, setBdata]=useState([]);
+  useEffect(()=>{
+    axios.get("/bdRank")
+    .then((res)=>{
+      console.log(res.data);
+      setBdata(res.data);
+    }).catch((err)=>
+    console.log(err));
+  },[])
+  const {a,b,c,d,e} = bData;
+
+    // const bn = sessionStorage.getItem('bno');
+    const id = sessionStorage.getItem("mid");
+    const str = sessionStorage.getItem("btitle");
+    const grade = sessionStorage.getItem("admin");
+    const [board, setBoard] = useState({
+        bno : 0,
+        btype:"",
+        btitle: "",
+        bmid: id,
+        bstr: "",
+        bview: "",
+    })
+
+  const [notice, setNotice] = useState([]);
+  const [ reco, setReco ] = useState([]);
+  const [ worry, setWorry ] = useState([]);
+  const [ show, setShow ] = useState([]);
+  const [ review, setReview ] = useState([]);
+
+  useEffect(()=>{
+  let aa=[];
+  if(a!==undefined){
+  for(let i=a.length-1; i>a.length-4; i--){
+    if(i < 0){
+      return;}
+    aa.push({name: a[i].btitle, read: a[i].bview, bno:a[i].bno});
+    setNotice(aa);}}
+    console.log(aa)
+
+  let bb=[];
+  if(b!==undefined){
+  for(let i=b.length-1; i>b.length-4; i--){
+    if(i < 0){
+      return;}
+    bb.push({name: b[i].btitle, read: b[i].bview, bno:b[i].bno});
+    setReco(bb);}}
+
+  let ee=[];
+  if(e!==undefined){
+  for(let i=e.length-1; i>e.length-4; i--){
+    if(i < 0){
+      return;}
+    ee.push({name: e[i].btitle, read: e[i].bview, bno:e[i].bno});
+    setWorry(ee);}}
+
+  let dd=[];
+  if(d!==undefined){
+    for(let i=d.length-1; i>d.length-4; i--){
+      if(i < 0){
+        return;}
+    dd.push({name: d[i].btitle, read: d[i].bview, bno:d[i].bno});
+    setShow(dd);}}
+
+  let cc=[];
+  if(c!==undefined){
+  for(let i=c.length-1; i>c.length-4; i--){
+    if(i < 0){
+      return;}
+    console.log(c)
+    cc.push({name: c[i].btitle, read: c[i].bview, bno:c[i].bno});
+    setReview(cc);}}
+},[a,b,c,d,e])
+
+const move = (ta,id) => {
+  console.log(ta);
+  switch(ta){
+    case "notice":
+      console.log(notice);
+      console.log(notice[id].bno);
+      localStorage.setItem('bno', notice[id].bno);
+      nav('/commuBoardDetail');
+      break;
+    case "reco" :
+      console.log(reco);
+      console.log(reco[id])
+      console.log(reco[id].bno);
+      localStorage.setItem('bno', reco[id].bno);
+      nav('/commuBoardDetail');
+      break;
+    case "worry" :
+      console.log(worry);
+      console.log(worry[id].bno);
+      localStorage.setItem('bno', worry[id].bno);
+      nav('/commuBoardDetail');
+      break;
+    case "show" :
+      console.log(show);
+      console.log(show[id].bno);
+      localStorage.setItem('bno', show[id].bno);
+      nav('/commuBoardDetail');
+      break;
+    case "review" :
+      console.log(review);
+      console.log(review[id].bno);
+      localStorage.setItem('bno', review[id].bno);
+      nav('/commuBoardDetail');
+      break;
+    
+  }
+}
+  return (
+    // <Section title=<>이시간 <h1 style={{color:"red"}}>HOT</h1></>  style={{ height: '100%' }}>
+    <Section title= '커뮤니티 인기글' style={{ height: '100%' }}>
+      <Table
+        style={{ marginTop: 30, fontSize:'18px', fontSize:'18px' }}
+        columns={[
+          //배열
+          {
+            name: '',
+            // render: (v, id) => id + 1,
+            style: {
+              width: 80,
+            },
+          },
+          {
+            //예시
+            name: <a href="/community/commuBoardNoti">공지사항</a>,
+            id: 'name',
+            render:(v, id)=>(<p className="link" onClick={()=>move("notice",id)}>{v}</p>)
+          },
+          {
+            name: <a href="/community/commuBoardNoti">+</a>,
+            id: 'read',
+            style: {
+              width: 80,
+            },
+          },
+        ]}
+        dataSource={notice}
+      ></Table>
+      <div>
+        <div className="table1">
+          <Table
+            style={{ marginTop: 30, marginRight: '50px', float: 'left', fontSize:'18px' }}
+            // data-aos="fade-up"
+            columns={[
+              //배열
+              {
+                name: '',
+                // render: (v, id) => id + 1,
+                style: {
+                  width: 80,
+                },
+              },
+              {
+                //예시
+                name: <a href="/community/commuBoardReco">추천할래요</a>,
+                id: 'name',
+                render:(v, id)=>(<p className="link" onClick={()=>move("reco",id)}>{v}</p>)
+
+              },
+              {
+                name: <a href="/community/commuBoardReco">+</a>,
+                id: 'read',
+                style: {
+                  width: 80,
+                },
+              },
+            ]}
+            dataSource={reco}
+          />
+
+          <Table
+            style={{ marginTop: 30, float: 'right' , fontSize:'18px'}}
+            // data-aos="fade-up"
+            columns={[
+              //배열
+              {
+                name: '',
+                // render: (v, id) => id + 1,
+                style: {
+                  width: 80,
+                },
+              },
+              {
+                //예시
+                name: <a href="/community/commuBoardWorry">고민있어요</a>,
+                id: 'name',
+                render:(v, id)=>(<p className="link" onClick={()=>move("worry",id)}>{v}</p>)
+
+              },
+              {
+                name: <a href="/community/commuBoardWorry">+</a>,
+                id: 'read',
+                style: {
+                  width: 80,
+                },
+              },
+            ]}
+            dataSource={worry}
+          />
+        </div>
+        <div className="table1" style={{ marginBottom: '20px' }}>
+          <Table
+            style={{ marginTop: '30px', marginRight: '50px', float: 'left', fontSize:'18px' }}
+            // data-aos="fade-up"
+            columns={[
+              //배열
+              {
+                name: '',
+                // render: (v, id) => id + 1,
+                style: {
+                  width: 80,
+                },
+              },
+              {
+                //예시
+                name: <a href="/community/commuBoardShow">자랑할래요</a>,
+                id: 'name',
+                render:(v, id)=>(<p className="link" onClick={()=>move("show",id)}>{v}</p>)
+
+              },
+              {
+                name: <a href="/community/commuBoardShow">+</a>,
+                id: 'read',
+                style: {
+                  width: 80,
+                },
+              },
+            ]}
+            dataSource={show}
+          />
+
+          <Table
+            style={{ marginTop: '30px', fontSize:'18px' }}
+            // data-aos="fade-up"
+            columns={[
+              //배열
+              {
+                name: '',
+                // render: (v, id) => id + 1,
+                style: {
+                  width: 80,
+                },
+              },
+              {
+                //예시
+                name: <a href="/community/commuBoardReview">업체후기톡톡</a>,
+                id: 'name',
+                render:(v, id)=>(<p className="link" onClick={()=>move("review",id)}>{v}</p>)
+
+              },
+              {
+                name: <a href="/community/commuBoardReview">+</a>,
+                id: 'read',
+                style: {
+                  width: 80,
+                },
+              },
+            ]}
+            dataSource={review}
+          />
+        </div>
+      </div>
+    </Section>
+  )
+}
+
+export default CommuMain
+```
+모든 게시판의 글들이 카테고리별로 출력되며 출력순서는 조회수 기준으로 카테고리별로 3개의 글까지 출력됩니다.
 
 ## Back_BoardController
 ```java
-    @GetMapping("newsListImg")
-    public List<Files> newsListImg(@RequestParam String type){
-        log.info("newsListImg()");
-        return bServ.newsListImg(type);
+    // 커뮤니티 인기글
+    @GetMapping ("bdRank")
+    public Map<String, List<Board>> bdRank(){
+        log.info("bdRank()");
+        return bServ.bdRank();
     }
 ```
 ## Back_BoardService
 ```java
-    public List<Files> newsListImg(String type) {
-        log.info("newsListImg()");
+    //커뮤니티 인기글
+    public Map<String, List<Board>> bdRank() {
+        log.info("bdRank");
+        Map<String, List<Board>> bMap = new HashMap<>();
+        try {
+            bMap.put("a",bRepo.findAllByBtype("공지사항", Sort.by("bview")));
+            bMap.put("b",bRepo.findAllByBtype("추천할래요", Sort.by("bview")));
+            bMap.put("c",bRepo.findAllByBtype("업체후기톡톡", Sort.by("bview")));
+            bMap.put("d",bRepo.findAllByBtype("자랑할래요", Sort.by("bview")));
+            bMap.put("e",bRepo.findAllByBtype("고민있어요", Sort.by("bview")));
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        log.info(bMap.toString());
+        return bMap;
+    }
+```
+Sort함수를 사용해 게시글을 조회수 기준으로 정렬시켰습니다.
 
-        List<Files> bfList = bfRepo.findByFtype(type);
-        return bfList;
+#### 전체 게시판 출력 화면<br><br>
+![image](https://user-images.githubusercontent.com/117874997/215294422-d28516c6-9b0a-4463-907f-43b5bda73d82.png)
+
+## CommuboardNoti.jsx 컴포넌트
+※ 게시판(형식이 모두 같아서 공지사항 게시판으로 정리했습니다)
+```javascript
+    const CommuBoardNoti = () => {
+  const { setNotiback } = useAuth();
+  const df = date => moment(date).format('YYYY- MM-DD HH:mm')
+  const cb = sessionStorage.setItem("cb", "공지사항");
+  const grade = sessionStorage.getItem('grade');
+
+  const nav = useNavigate()
+  
+  let pnum = sessionStorage.getItem('pageNum')
+
+  const [bitem, setBitem] = useState({})
+  const [page, setPage] = useState({
+    totalPage: 0,
+    pageNum: 1,
+    btype: '공지사항',
+  })
+
+  // 게시글 목록을 서버로부터 가져오는 함수
+  const getList = pnum => {
+    axios
+      .get('/list', { params: { pageNum: pnum, type: '공지사항' } })
+      .then(res => {
+        console.log(res.data)
+        const { bList, totalPage, pageNum, btype } = res.data
+        setPage({ totalPage: totalPage, pageNum: pageNum, btype: btype })
+        // console.log(totalPage);
+        setBitem(bList)
+        sessionStorage.setItem('pageNum', pageNum)
+      })
+      .catch(err => console.log(err))
+  }
+
+  const getBoard = useCallback(bno => {
+    // 보여질 게시글 번호를 localStorage에 저장(글 번호 유지)
+    localStorage.setItem('bno', bno)
+    nav('/commuBoardDetail')
+  }, [])
+
+  // main 페이지가 화면에 보일때 서버로부터 게시글 목록을 가져옴
+  useEffect(() => {
+    pnum !== null ? getList(pnum) : getList(1)
+  }, [])
+
+  // 출력할 게시글 목록 작성 
+  let list = null
+  if (bitem.length === 0) {
+    list = (
+      <CTableRow key={0}>
+        <CTableColumn span={5}>게시글이 없습니다.</CTableColumn>
+      </CTableRow>
+    )
+  } else {
+    list = Object.values(bitem).map((item, i) => (
+      <CTableRow key={item.bno}>
+      <CTableColumn wd="w-10">{(pnum - 1)*10 + i +1}</CTableColumn>
+    <CTableColumn wd="w-40">
+      <div onClick={() => getBoard(item.bno)}>{item.btitle}</div>
+        </CTableColumn>
+        <CTableColumn wd="w-20">{item.bmid}</CTableColumn>
+        <CTableColumn wd="w-20">{df(item.bdate)}</CTableColumn>
+        <CTableColumn wd="w-10">{item.bview}</CTableColumn>
+      </CTableRow>
+    ))
+  }
+
+  // 글쓰기 화면으로 이동
+  const onWrite = () => {
+    const id = sessionStorage.getItem('mid')
+    if (id === '' || id == null) {
+      window.alert('로그인 후, 게시글을 작성하실 수 있습니다.')
+    } else {
+      nav('/CommuBoardWr')
+    }
+  }
+
+  return (
+    <div>
+      <div className="Main">
+        <div className="Content_table">
+          <CTable hName={['No', '제목', '작성자', '날짜', '조회수']}>{list}</CTable>
+          <Paging page={page} getList={getList} wd="w-20" />
+          <div className="btn">
+            {grade === 'admin' ? 
+            <Button style={{width:'90px',height:'50px',background:'#C3B6D9', borderRadius:'10px'}} onClick={onWrite}>글쓰기</Button>: null}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CommuBoardNoti
+```
+공지사항 게시판이 처음 열렸을 때 데이터베이스에서 type이 "공지사항"인 데이터만 가져옵니다. 일반회원과 관리자의 권한을 나누어서 관리자만 글을 작성할 수 있고, 관리자는 글쓰기 버튼이 있지만, 일반회원은 공지사항 게시판에 들어가면 글쓰기 버튼이 나타나지 않습니다.
+
+## Back_BoardController
+```java
+    // 커뮤니티 리스트
+    @GetMapping("list")
+    public Map<String, Object> getList(@RequestParam Integer pageNum,String type ,HttpSession session){
+        log.info("getList()");
+        log.info(""+type);
+        return bServ.getBoardList(type, pageNum);
+    }
+```
+## Back_BoardService
+```java
+    //커뮤니티 게시글 리스트
+    public Map<String, Object> getBoardList(String type,Integer pageNum){
+        log.info("getBoardList()");
+
+        if (pageNum == null){ // 처음에 접속할때 pageNum 못넘어오게
+            pageNum = 1;
+        }
+        int listCnt = 10; // 페이지당 보여질 게시글 갯수
+
+        // 페이징 조건 생성
+        Pageable pb = PageRequest.of((pageNum - 1), listCnt,
+                Sort.Direction.DESC, "bno");
+
+        Page<Board> result = bRepo.findByBtype(type, pb);
+        List<Board> bList = result.getContent();
+        int totalPage = result.getTotalPages();
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("totalPage", totalPage);
+        res.put("pageNum", pageNum);
+        res.put("bList", bList);
+        log.info(""+result.getContent());
+
+        return res;
     }
 ```
 
-#### 뉴스 전체출력 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294422-d28516c6-9b0a-4463-907f-43b5bda73d82.png)
-
-#### 뉴스 작성화면 (상담게시판과 겹치는 부분이 많아 이미지만 첨부합니다.)<br><br>
+#### 공지사항 출력 화면 <br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
 
-#### 뉴스 상세보기 화면_1(상담게시판과 겹치는 부분이 많아 이미지만 첨부합니다.)<br><br>
+
+## CommuBoardWr.jsx 컴포넌트
+※ 게시판 작성
+```javascript
+const CommuBoardWr = () => {
+// const CommuBoardWr = ({handleList}) => {
+    const nav = useNavigate();
+    
+  // const titleRef = useRef();
+  // const contetnRef = useRef();
+  const [fileImage, setFileImage] = useState('')
+
+  const id = sessionStorage.getItem("mid");
+  const grade = sessionStorage.getItem("grade");
+  const cb = sessionStorage.getItem("cb");
+  console.log(cb);
+  const [data, setData] = useState({
+    btype: cb,
+    btitle: "",
+    bmid: id,
+    bstr: "",
+    bview: "",
+  });
+
+  useEffect(()=>{
+    console.log(data);
+  },[data])
+  const inputBoard = useRef();
+  const borderCh = (e) => {
+    inputBoard.current.style.border = '1px solid lightgray';
+    inputBoard.current.style.background = 'white';
+    inputBoard.current = e.target
+    inputBoard.current.style.border = '1px solid black';
+    inputBoard.current.style.background = 'rgb(248,248,248)';
+  
+  }
+  //전송 데이터와 파일을 담을 멀티파트 폼 생성
+  let formData = new FormData();
+  // const { btitle, bstr, btype,  } = data;
+
+  //작성한 내용(글, 파일들) 전송 함수
+  const onWrite = useCallback(
+    (e) => {
+      e.preventDefault();
+      //console.log(data);
+      //전송 시 파일 이외의 데이터를 폼데이터에 추가
+      formData.append(
+        "data",
+        new Blob([JSON.stringify(data)], { type: "application/json" })
+      );
+
+      axios
+        .post("/writeProc", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((res) => {
+          if (res.data === "Ok") {
+            alert("작성 성공");
+            sessionStorage.removeItem("pageNum");
+            nav(-1);
+          } else {
+            alert("작성 실패");
+            //formData = new FormData();
+          }
+        })
+        .catch((error) => console.log(error));
+    },
+    [data]
+  );
+  const onChange = useCallback(
+    (e) => {
+      const dataObj = {
+        ...data,
+        [e.target.name]: e.target.value,
+        bmid:id,
+      };
+      console.log(dataObj);
+      setData(dataObj);
+    },
+    [data]
+  );
+  //console.log(data);
+  //파일 선택 시 폼데이터에 파일 목록 추가(다중파일)
+  const onFileChange = useCallback(
+    (e) => {
+      const files = e.target.files;
+      console.log(files);
+      for (let i = 0; i < files.length; i++) {
+        setFileImage(URL.createObjectURL(e.target.files[0]))
+        formData.append("files", files[i]);
+      }
+    },
+    [formData]
+  );
+    const imageInput = useRef();
+    const onClickImg = () => {
+        imageInput.current.click();
+    }
+    
+  const options = [
+    {
+      defaultLabel: '공지사항',
+      value : '공지사항',
+      label :'공지사항'
+    },
+    {
+      defaultLabel: '추천할래요',
+      value : '추천할래요',
+      label :'추천할래요'
+    },
+    
+    {
+      defaultLabel: '고민있어요',
+      value : '고민있어요',
+      label :'고민있어요'
+    },
+    {
+      defaultLabel: '자랑할래요',
+      value : '자랑할래요',
+      label :'자랑할래요'
+    },
+    {
+    defaultLabel: '업체후기톡톡',
+    value : '업체후기톡톡',
+    label :'업체후기톡톡'
+  },
+  ]
+  const options1 = [
+    // {
+    //     defaultLabel: 1,
+    //     value : 1,
+    //     label :'공지사항'
+    // },
+  {
+    defaultLabel: '추천할래요',
+    value : '추천할래요',
+    label :'추천할래요'
+  },
+  
+  {
+    defaultLabel: '고민있어요',
+    value : '고민있어요',
+    label :'고민있어요'
+  },
+  {
+    defaultLabel: '자랑할래요',
+    value : '자랑할래요',
+    label :'자랑할래요'
+  },
+  {
+    defaultLabel: '업체후기톡톡',
+    value : '업체후기톡톡',
+    label :'업체후기톡톡'
+    },
+  ]
+    return(
+        <div>
+            <Header />
+        <div className="Main">
+            <form className="Content" onSubmit={onWrite}>
+                {/*  onSubmit={onWrite} */}
+                {/* <h1>글쓰기</h1><br /> */}
+               
+                <div style={{marginTop:"50px", marginBottom:"30px"}}>
+                   {grade === 'admin' ?(
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    name="btype" onChange={onChange}>
+                      {options.map((item)=>(
+                        <option value={item.value} onChange={onChange}>{item.label}</option>
+                      ))}
+                    </Sel>):(
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    name="btype" onChange={onChange}>
+                      {options1.map((item)=>(
+                        <option value={item.value} onChange={onChange}>{item.label}</option>
+                      ))}
+                    </Sel>)}
+                    <input style={{width:"900px", height:"50px", borderBottom:'none'}}
+                    className="Input" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="제목을 입력하세요." autoFocus required 
+                      name="btitle" value={data.btitle} onChange={onChange}
+                    />
+                    <textarea style={{width: "1050px", height:"500px",}} onScroll 
+                    className="Textarea" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="게시글을 작성하세요."
+                      name="bstr" onChange={onChange} value={data.bstr} 
+                    ></textarea>
+                    <div>
+                      {fileImage && (
+                        <div>
+                          <img alt="image" src={fileImage} style={{ width: '350px', height: '350px' }} />
+                        </div>
+                      )}
+                    </div>
+                    <input type="file" name = "files" multiple className="Input" accept="image/*" ref={imageInput} onChange={onFileChange}
+                    style={{ display:'none',
+                        width:"1000px", height:"50px", fontSize:"1rem", marginTop:"-10px", paddingLeft:"10px"
+                    }} />
+                    <button style={{width: '120px', height: '50px', background:'#C3B6D9',border:'1px solid #D6C7ED', color:'',borderRadius:'10px'}} type="button" className="filebtn" onClick={onClickImg}>첨부하기</button>
+                </div>
+                <div className="Buttons">
+                    <Button  wsize="s-30" style={{marginRight:"10px",width: '120px', height: '50px', background:'#C9A3B6',borderRadius:'10px'}}>
+                        작성하기
+                    </Button>
+                    <Button type="button" wsize="s-10" color="gray" outline onClick={() => nav(-1)}
+                    style={{width: '120px', height: '50px', backgroundColor:"lightgray",borderRadius:'10px'}}>취소하기</Button>
+                </div>
+            </form>
+        </div>
+        <Footer />
+        </div>
+    );
+}
+export default CommuBoardWr;
+```
+
+## Back_BoardController
+```java
+    // 커뮤니티 리스트
+    @GetMapping("list")
+    public Map<String, Object> getList(@RequestParam Integer pageNum,String type ,HttpSession session){
+        log.info("getList()");
+        log.info(""+type);
+        return bServ.getBoardList(type, pageNum);
+    }
+```
+## Back_BoardService
+```java
+    //커뮤니티 게시글 리스트
+    public Map<String, Object> getBoardList(String type,Integer pageNum){
+        log.info("getBoardList()");
+
+        if (pageNum == null){ // 처음에 접속할때 pageNum 못넘어오게
+            pageNum = 1;
+        }
+        int listCnt = 10; // 페이지당 보여질 게시글 갯수
+
+        // 페이징 조건 생성
+        Pageable pb = PageRequest.of((pageNum - 1), listCnt,
+                Sort.Direction.DESC, "bno");
+
+        Page<Board> result = bRepo.findByBtype(type, pb);
+        List<Board> bList = result.getContent();
+        int totalPage = result.getTotalPages();
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("totalPage", totalPage);
+        res.put("pageNum", pageNum);
+        res.put("bList", bList);
+        log.info(""+result.getContent());
+
+        return res;
+    }
+```
+
+#### 공지사항 작성화면 <br><br>
+![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### 공지사항 상세보기 화면_1<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215294274-09444e9d-3881-4b0b-ab0f-5b435ebc5bdb.png)
 
-#### 뉴스 상세보기 화면_2(상담게시판과 겹치는 부분이 많아 이미지만 첨부합니다.)<br><br>
+#### 공지사항 수정 화면_2<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215294304-21a03e7f-78be-42c0-b50a-42bbfbecb028.png)
 
-## ChattingBot.jsx 컴포넌트
+## JoinModal.jsx 컴포넌트
 
-※ 챗봇 라이브러리 
+※ 회원가입
 ```javascript
 
-const ChattingBot = ({img, setImg}) => {
-    const steps = [
+const JoinModal = ( props ) => {
+    const nav = useNavigate();
+    const [bb, setBb] = useState(false);
+    const modalRef = useRef(null);
+    const [cfBtn, setCfBtn] = useState(false);
+    const [test, setTest] = useState({})
+    const [a, setA] = useState("");
+    const [b, setB] = useState(false);
+    const [p1, setP1] = useState("");
+    const [p2, setP2] = useState("");
+    const [p3, setP3] = useState("");
+    const [r1, setR1] = useState("");
+    const [r2, setR2] = useState("");
+    const reftest = useRef();
+    const [account, setAccount] = useState(
         {
-            id: '0', 
-            message : '안녕하세요 회원님💙 Wedding Dive 챗봇입니다.',
-            trigger: '1',
-        },
-        {
-            id: '1',
-            message : '준비가 되셨다면 시작버튼을 눌러 주세요.',
-            trigger: '2',
-            // end:true
-        },
-        {
-            id: '2',
-            options: [
-              { value: 1, label: '시작하기', trigger: '3' }
-            ],
-        },
-        {
-            id: '3',
-            options : [
-                { value: 1, label: '자주 묻는 질문', trigger: '4'},
-            ]
-        },
-        {
-            id: '4',
-            options : [
-                {value: 1, label: '왜 Wedding Dive인가요? 💕', trigger:'5'},
-                {value: 2, label: '예식 사진촬영시 친구는 몇명이 적당한가요? 💕', trigger: '6'},
-                {value: 3, label: '드레스를 잘 고르는 법이 있나요? 💕', trigger: '7'},
-                {value: 4, label: '신혼여행 준비는 언제쯤 하는 게 좋나요? 💕', trigger: '10'},
-                {value: 5, label: '신랑님 체크사항 💕', trigger:'12'},
-                {value: 6, label: '신부님 체크사항 💕', trigger:'17'},
-                {value: 7, label: '차은우 전화번호 💕', trigger:'18'},
-                {value: 8, label: '추가 다른 문의는❔💕', trigger:'19'}
-            ]
-        },
-        {
-            id: '5',
-            message : '결혼하고 싶은 우리 모두의\n소망을 담아 만들었습니다.',
-            trigger:'99'
-        },
-        {
-            id: '6',
-            message : '적게는 18명에서 많게는\n25명까지 줄을 섭니다.',
-            trigger:'99'
-        },
-        {
-            id: '7',
-            message : '기본적으로 드레스를 결정하실 때엔 신부님 체형의 단점은 커버해주고 장점은 부각시켜 주는 드레스를 선택해야 합니다.\n\n 하체에 콤플렉스가 있는 신부님의 경우 허리라인은 살려주고 하체 라인이 돋보이지 않게 가려줄 A라인이나 벨라인 드레스가 어울리며\n\n키가 크고 골반이 있으신 분들은 머메이드 라인이 어울립니다.',
-            trigger: '99',
-        },
-        {
-            id:'10',
-            message : '보통 허니문을 예약하시는 평균적인 시기는 출발 6개월 전이지만 예식 날짜와 예식장 결정이 되시면 바로 준비하셔야 합니다.\n\n 왜냐!! 허니문 비용을 가장 효과적으로 줄일 수 있는 방법이 바로 항공권이기 때문이에요.',
-            trigger: '99',
-        },
-        {
-            id:'12',
-            message:'- 구두 색깔과 같은 목이 긴 양말 착용\n\n- 식장에 디피해 놓을 액자를 받지 못하였다면 예식 당일 반드시 수령\n\n- 웨딩카와 웨딩카에 장식이 되어있는지 체크\n\n- 주례자와 사회자 도착 여부 확인\n\n- 여행가방과 지갑 등을 미리 식구나 친구에게 부탁하여 웨딩카에 넣어 두었는지 확인',
-            trigger:'99',
-        },
-        {
-            id:'17',
-            message:'- 충분한 휴식, 숙면, 신부님을 도와줄 친구 섭외',
-            trigger:'99',
-        },
-        {
-            id:'18',
-            message:'010 - 1111 - 1111입니다.', 
-            trigger:'99',
-        },
-        {
-            id:'19',
-            message:'자세한 1:1 문의는 아래 링크를 클릭하세요!',
-            trigger:'20',
-        },
-        {   
-            id:'20',
-            component : (
-                <a href="/ServiceCenter" style={{color:'white', marginLeft:'5px', fontSize:'17px'}}>1:1 문의하러 가기</a>
-            ),
-            trigger: '99',
-        },
-        {
-            id: 'jb',
-            component : (
-                <img src={jb} style={{width:"280px", height:"300px"}}/>
-            ),
-            trigger:'99'
-        },
-        {
-            id: '99',
-            options: [
-            { value: 1, label: '처음으로', trigger: '3'},
-            { value: 2, label: '종료하기', trigger: '100'},
-            ]
-        },
-        {
-            id: '100',
-            message : '감사합니다.\n좋은 하루 되세요 :)',
-            end : true
-        },
-    ]
+        }
+        )
+        useEffect(()=>{
+            axios.get("/compareId", {params:{mid:account.mid}})
+            .then((res)=>{
+                setTest({...test,
+                fi:res.data});
+            })
+        },[account.mid]);
 
-    const theme = {
-        background: '#f5f8fb',
-        fontFamily: 'Helvetica Neue',
-        // headerBgColor: '#EF6C00',
-        headerBgColor : '#F7ECEC',
-        // FontWeight : '200',
-        // headerFontColor: '#fff',
-        headerFontColor : 'black',
-        headerFontSize: '15px',
-        // botBubbleColor: '#EF6C00',
-        botBubbleColor : '#EBF7FF',
-        botFontColor: '#black',
-        userBubbleColor: 'white',
-        userFontColor: 'black',
-    };
-    
-    return (
-        <>
-        <h3 style={xbtn} onClick={() => setImg(!img)}>✖</h3>
-        <ThemeProvider theme={theme} >
-            <ChatBot steps={steps} 
-            headerTitle="Wedding Dive 채팅봇"
-            placeholder="채팅이 불가능한 채널입니다."
-            botDelay={500} userDelay={500} style={st}
-            // 인풋 검색창 스타일
-            // inputStyle={{position : "fixed", bottom : "0"}}
-            // 봇 아바타 스타일
-            avatarStyle={{width : '46px', background:'#EBF7FF'}} 
-            // avatarStyle={{width : '180px', height:'180px'}} 
-            // 선택 버튼 스타일
-            bubbleOptionStyle={{width : '330px', background : '#F7ECEC', color:'black'}} 
-            contentStyle={{width:"415px"}} 
-            customStyle={{background:"#DB8383", width:"338px", }}
-            />
-        </ThemeProvider>
-        </>
-    );    
+
+        //input에 입력될 때마다 account state값이 변경되게 하는 함수
+    const onChangeAccount = (e) => {
+        console.log(e.target.value+"asdsadadsda")
+        console.log(test)
+    if(e.target.name=="p1"){
+        setP1(e.target.value);
+    }
+    if(e.target.name=="p2"){
+        setP2(e.target.value);
+    }
+    if(e.target.name=="p3"){
+        setP3(e.target.value);
+    }
+    if(e.target.name=="r1"){
+        setR1(e.target.value);
+    }
+    if(e.target.name=="r2"){
+        setR2(e.target.value);
+    }
+
+    const r = r1 + r2
+    const p = p1 + p2 + p3;
+    const addr = a
+            setAccount({
+                ...account,
+            [e.target.name]: e.target.value,
+            mpid : r,
+            mphone: p,
+            maddr: addr
+        });
+
+        // const joinIn=document.getElementById("joinIn");
+        // if(a!= "" && b!= false){
+        //     joinIn.disabled=false;
+        // } else{
+        //     joinIn.disabled=true;
+        // }
+        // if((account.mid&&account.mpwd&&account.mname&&account.mpid&&account.maddr&&account.mphone&&account.memail)!=""){
+        //     joinIn.disabled=false;
+        //     joinIn.style.background="black"
+        // }
 }
-export default ChattingBot;
+
+
+    const jbtn = () => {
+        axios.post("/joinProc", account)
+        .then((res) => {
+            console.log(res);
+            window.alert("이랏샤이마세 👏");
+            props.setMymodal(false);
+            setAccount({});
+        }).catch(err => console.log(err))
+    }
+
+
+    // 팝업창 상태 관리
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    useEffect(() => {
+        // 이벤트 핸들러 함수
+        if(isPopupOpen===true||bb===true){
+            return;
+        }
+        const handler = (event) => {
+            // mousedown 이벤트가 발생한 영역이 모달창이 아닐 때, 모달창 제거 처리
+            if (!modalRef.current.contains(event.target)) {
+                props.setMymodal(false);
+                const scrollY = document.body.style.top;
+                document.body.style.cssText = '';
+                window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);}
+        };
+
+        document.addEventListener('mousedown', handler);
+        
+        return () => {
+            document.removeEventListener('mousedown', handler);
+        };
+    });
+
+    
+    // 팝업창 열기
+    const openPostCode = () => {
+        setIsPopupOpen(true)
+    }
+    
+    // 팝업창 닫기
+    const closePostCode = () => {
+        setIsPopupOpen(false)
+    }
+    
+    useEffect(()=>{
+        console.log(reftest.current);
+        let id1 = document.getElementById("checkId");
+        let idresult = document.getElementById("idresult");
+        const idRegExp = /^(?=.*[a-zA-Z][0-9])[^!@#$%^*+=-]{4,12}$/;
+        let pwd1 = document.getElementById("pwd1");
+        let pwd2 = document.getElementById("pwd2");
+        let pwdresult = document.getElementById("pwdresult");
+        let cresult = document.getElementById("cresult");
+        const pwdRegExp = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/;
+        if(reftest.current===id1){
+        if(account.mid===""||account.mid===undefined){
+            idresult.style.display="none";
+        } else if (!idRegExp.test(account.mid)) {
+            setTest({...test, ai:0});
+            idresult.innerHTML="대소문자 또는 숫자 조합으로 4-12자리 입력해 주세요!";
+            idresult.style.display="block";
+            idresult.style.color="red";
+        }else if(test.fi==="Failed"){
+            console.log("이걸봐"+test.fi);
+            setTest({...test, ai:0});
+            idresult.innerHTML="중복된 아이디 입니다.";
+            idresult.style.display="block";
+            idresult.style.color="red";
+            console.log(test.ai)
+        }else if(idRegExp.test(account.mid)&&test.fi==="Ok") {
+            console.log("이걸봐"+test.fi);
+            setTest({...test, ai:1});
+            idresult.innerHTML="사용가능한 아이디 입니다.";
+            idresult.style.display="block";
+            idresult.style.color="limeGreen";
+            console.log("할렐루야")
+        }}
+
+        if(reftest.current===pwd1){
+        if(pwd1.value == "" || pwd1.value===undefined){
+            pwdresult.style.display="none";
+            setTest({...test,bi:0});
+        } else if(!pwdRegExp.test(pwd1.value)){
+            pwdresult.innerHTML="숫자+영문자+특수문자 조합으로 8자리 이상 입력해주세요!"
+            pwdresult.style.display="block";
+            pwdresult.style.color="red";
+            console.log("asddsa")
+            setTest({...test, bi:0});
+        }  else if(pwdRegExp.test(pwd1.value)) {
+            pwdresult.innerHTML=("안전한 비밀번호 입니다.");
+            pwdresult.style.display="block";
+            pwdresult.style.color="limeGreen";
+            setTest({...test, bi:1});
+        }
+    }
+        if(reftest.current===pwd2){   
+            if(pwd1.value == "" || pwd2.value==""){
+            cresult.style.display="none";
+            setTest({...test,ci:0});;
+        }else if(pwd1.value==pwd2.value){
+            cresult.style.display="block";
+            cresult.style.color="limeGreen";
+            cresult.innerHTML="비밀번호가 일치합니다.";
+            setTest({...test,ci:1});;
+        } else{
+            cresult.style.display="block";
+            cresult.style.color="red";
+            cresult.innerHTML="비밀번호가 일치하지않습니다."
+            setTest({...test,ci:0});;
+        }
+    }
+
+    // const regName = () => {
+        const nameCheck=document.getElementById("nameCheck");
+        if(reftest.current===nameCheck){ 
+            const nameRegExp = /^[a-zA-zㄱ-ㅎ|ㅏ-ㅣ|가-힣]{0,12}$/;
+            if(!nameRegExp.test(nameCheck.value)){
+                nameCheck.value="";
+                alert("한글 또는 영어 12자 이하로 입력해주세요")
+            }
+        }
+    // }
+
+    // const regRno = () => {
+        const rnoCheck1=document.getElementById("rnoCheck1");
+        const rnoCheck2=document.getElementById("rnoCheck2");
+        if(reftest.current===rnoCheck1||reftest.current===rnoCheck2){ 
+            const rnoRegExp = /^[0-9]{0,7}$/;
+            const rnoRegExp2 = /^[0-9]{6}$/;
+            const rnoRegExp3 = /^[0-9]{7}$/;
+
+        if(!rnoRegExp.test(rnoCheck1.value)){
+            rnoCheck1.value="";
+            alert("숫자만 입력해주세요.")
+        }
+        if(!rnoRegExp.test(rnoCheck2.value)){
+            rnoCheck2.value="";
+            alert("숫자만 입력해주세요.")
+        }
+
+        if(rnoRegExp2.test(rnoCheck1.value)&&rnoRegExp3.test(rnoCheck2.value)){
+            setTest({...test,
+                ei:1
+            })
+        }else{
+            setTest({...test,
+                ei:0
+            })
+        }
+    }
+    // }
+    // const regPno = () => {
+        const pnoCheck1=document.getElementById("pnoCheck1");
+        const pnoCheck2=document.getElementById("pnoCheck2");
+        const pnoCheck3=document.getElementById("pnoCheck3");
+        if(reftest.current===pnoCheck1 ||reftest.current===pnoCheck2 ||reftest.current===pnoCheck3){ 
+        const pnoRegExp = /^[0-9]{0,4}$/;
+        const pnoRegExp2 = /^[0-9]{3}$/;
+        const pnoRegExp3 = /^[0-9]{4}$/;
+
+
+        if(!pnoRegExp.test(pnoCheck1.value)){
+            pnoCheck1.value="";
+            alert("숫자만 입력해주세요.")
+        }
+        if(!pnoRegExp.test(pnoCheck2.value)){
+            pnoCheck2.value="";
+            alert("숫자만 입력해주세요.")
+        }
+        if(!pnoRegExp.test(pnoCheck3.value)){
+            pnoCheck3.value="";
+            alert("숫자만 입력해주세요.")
+        }
+
+        if(pnoRegExp2.test(pnoCheck1.value)&&pnoRegExp3.test(pnoCheck2.value)&&pnoRegExp3.test(pnoCheck3.value)){
+            setTest({...test,
+                di:1
+            })
+        }else{
+            setTest({...test,
+                di:0
+            })
+            setB(false);
+        }
+    }
+    
+    const myemail = document.getElementById("myE");
+    if(reftest.current===myemail){
+            console.log('이거다아아')
+            const emailRegExp = /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
+            if(emailRegExp.test(myemail.value)){
+                setTest({...test,
+                    gi:1
+                })
+            } else{
+                setTest({...test,
+                    gi:0
+                })
+            }
+        }
+    
+        const addr2 = document.getElementById("addr2");
+        if(reftest.current===addr2){
+            console.log(addr2.value);
+            if(addr2.value===""||addr2.value===undefined){
+                setTest({...test,
+                    hi:0
+                })
+            } else{
+                setTest({...test,
+                    hi:1
+                })
+            }
+        }
+    
+    },[account.mid,account.mpwd,account.mpwd2,account.mpid, account.mname ,account.mphone, account.maddr, account.mdaddr,account.memail ,test.fi])
+    console.log(test)
+    const click= (e) => {
+        reftest.current = e.target;
+        console.log(reftest.current)
+    }
+    return (
+        <div className="JoinModal">
+           <div ref={modalRef} className="JoinContainer">
+               <section className="user-input">
+                   <div className="jtx"><Logo>Wedding Dive<br/> Join</Logo></div>
+                   <hr className="jhr"/>
+                   <form>
+                   <div className="jinput-container">
+                   <div className="join-title">아이디</div>
+                   <input className="input-basic" id="checkId" type="text" required placeholder="아이디를 입력하세요." name="mid" ref={reftest} onClick={(e)=>click(e)} onChange={(e)=> { onChangeAccount(e); click(e)}} autoFocus/>
+                   </div>
+                   <div id="idresult" style={{display:"none", color:"red", textIndent:"0%", textAlign:"left" , paddingBottom:"15px",lineHeight:"0px" , marginLeft:"210px"}}></div>
+                   <div className="jinput-container">
+                   <div className="join-title">비밀번호</div>
+                   <input className="input-basic" id="pwd1" type="password" required placeholder="비밀번호를 입력하세요." name="mpwd"ref={reftest} onClick={(e)=>click(e)} onChange={(e)=>{ onChangeAccount(e); click(e)}} />
+                   </div>
+                   <div id="pwdresult" style={{display:"none", color:"red", textIndent:"0%", textAlign:"left" ,paddingBottom:"15px",lineHeight:"0px" , marginLeft:"210px"}}></div>
+                   <div className="jinput-container">
+                   <div className="join-title">비밀번호 <br/>재확인</div>
+                   <input className="input-basic" id="pwd2" name="mpwd2" type="password" required placeholder="비밀번호를 입력하세요. " ref={reftest} onClick={(e)=>click(e)}  onChange={(e)=>{ onChangeAccount(e); click(e)}}/>
+                   </div>
+                   <div id="cresult" style={{display:"none", color:"red", textIndent:"0%", textAlign:"left" , paddingBottom:"15px",lineHeight:"0px" , marginLeft:"210px"}}></div>
+                   <div className="jinput-container">
+                   <div className="join-title">이름</div>
+                   <input className="input-basic" id="nameCheck" type="text" required placeholder="이름을 입력하세요." name="mname" ref={reftest} onClick={(e)=>click(e)} onChange={(e) => {onChangeAccount(e); click(e)}}/>
+                   </div>
+                   <div className="jinput-container">
+                   <div className="join-title">주민번호</div>
+                        <div style={{width:"350px"}}>
+                            <input className="mtrno" id="rnoCheck1" type="text" maxLength="6" minLength="6" required placeholder="950618" name="r1" ref={reftest} onClick={(e)=>click(e)} onChange={(e) => {onChangeAccount(e); click(e)}}/><span style={{margin:"0 2%"}}>-</span>
+                            <input className="mtrno" id="rnoCheck2" type="password" maxLength="7" minLength="7" required placeholder="1xxxxxx" name="r2" ref={reftest} onClick={(e)=>click(e)} onChange={(e) =>{onChangeAccount(e); click(e)}}/>
+                        </div>
+                   </div>
+                   <div className="jinput-container">
+                   <div className="join-title">주소</div>
+                   <input className="input-basic" type="text" value={a} name="maddr" readOnly required placeholder="주소를 입력하세요." onClick={() => openPostCode()}/>
+                   </div>
+                   <div className="jinput-container">
+                   <div className="join-title">상세주소</div>
+                   <input className="input-basic" type="text" id="addr2" name="mdaddr" required placeholder="상세주소를 입력하세요."ref={reftest} onClick={(e)=>click(e)} onChange={(e)=>{onChangeAccount(e); click(e)}}/>
+                   </div>
+                   <div className="jinput-container">
+                   <div className="join-title">핸드폰 <br/>번호</div>
+                   <span className="phone-container">
+                    { b === false ? <>
+                   <input className="phone-box" id="pnoCheck1" type="text" minLength="2" maxLength="3" required placeholder="010" name="p1" ref={reftest} onClick={(e)=>click(e)} onChange={(e) =>{onChangeAccount(e); click(e)}}/><span className="phonew">-</span>
+                   <input className="phone-box" id="pnoCheck2" type="text" minLength="4" maxLength="4" required placeholder="0000" name="p2"ref={reftest} onClick={(e)=>click(e)}  onChange={(e) =>{onChangeAccount(e); click(e)}}/><span className="phonew">-</span>
+                   <input className="phone-box" id="pnoCheck3" type="text" minLength="4" maxLength="4" required placeholder="0000" name="p3" ref={reftest} onClick={(e)=>click(e)} onChange={(e) =>{onChangeAccount(e); click(e)}}/></> :  <>
+                   <input className="phone-box" id="pnoCheck1" type="text" minLength="2" maxLength="3" required placeholder="010" name="p1" disabled onChange={(e) =>{onChangeAccount(e); click(e)}}/><span className="phonew">-</span>
+                   <input className="phone-box" id="pnoCheck2" type="text" minLength="4" maxLength="4" required placeholder="0000" name="p2" disabled  onChange={(e) =>{onChangeAccount(e); click(e)}}/><span className="phonew">-</span>
+                   <input className="phone-box" id="pnoCheck3" type="text" minLength="4" maxLength="4" required placeholder="0000" name="p3" disabled  onChange={(e) =>{onChangeAccount(e); click(e)}}/></> }
+                   { test.di ===1 ?
+                   <PhoneConfirm opacity={1} background={'#C3B6D9'} setB={setB} setBb={setBb} account={account} p1={p1} p2={p2} p3={p3} /> : <PhoneConfirm background={"#C3B6D9"} opacity={0.7} setB={setB} disabled={true} />}
+                   </span>
+                   </div>
+                   <div className="jinput-container">
+                   <div className="join-title">이메일</div>
+                   <input className="input-basic" id="myE" type="email" name="memail" required placeholder="@이메일주소를 입력하세요." ref={reftest} onChange={(e)=>{onChangeAccount(e); click(e)}}/>
+                   </div>
+                   {account.mid!==""&&account.mpwd!==""&&account.mname!==""&&account.mpid!==""&&account.maddr!==""&&account.mphone!==""&&account.memail!==""&&a!==""&&b!==false&&test.bi===1&&test.ci===1&&test.di===1&&test.ei===1&&test.gi===1&&test.hi===1 ?
+                   <button type="button" className="join-btn" id="joinIn" style={{background:"#C9A3B6"}} onClick={jbtn}>회원가입</button> : <button type="button" className="join-btn" id="joinIn" style={{background:"#C9A3B6", opacity:"0.7"}} disabled>회원가입</button>}
+                    { props.mymodal ? <button className="join-btn-del" style={{background:"lightgray"}} onClick={()=>props.setMymodal(false)}>취소하기</button>:<button className="join-btn-del" style={{background:"lightgray"}} onClick={() =>props.setSelectJoin(false)}>돌아가기</button>}
+               </form>
+               </section>
+               <div>
+                </div>
+                </div>
+                    {/* 클릭 시 팝업 생성 */}
+                    {/* 팝업 생성 기준 div */}
+                    <div id='popupDom'>
+                        {isPopupOpen && (
+                            <PopAddDom>
+                                <PopAddPostCode onClose={closePostCode} setA={setA} />
+                            </PopAddDom>
+                        )}
+                </div>
+        <div>
+    </div>
+</div>         
+    );
+}
+
+export default JoinModal;
 ```
 react-simple-chatbot 라이브러리를 이용해 자주 묻는 질문은 챗봇을 통해 대답하고 그 외의 질문은 버튼을 통해 상담문의게시판으로 이동하게 만들었습니다.
 
