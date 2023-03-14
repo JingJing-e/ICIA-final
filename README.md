@@ -980,8 +980,8 @@ log.info(hseoul+"이거왜안되지?");
 }
 
 프론트에서 받아온 값을 매개변수로 받고 repository에서 쿼리문을 사용해 만든 함수 findByRsdate, findBySSlocation 등으로 데이터베이스에 일치하는 데이터를 가져온 후 데이터들을 카테고리별로 list에 담고 각 리스트들을 map에 담아서 return 합니다.<br><br>
-- #### 검색 화면<br><br>
-<img width="1109" alt="견적조회 테이블" src="https://user-images.githubusercontent.com/117880554/224933103-1a73367e-606d-40a6-b43f-b770d99f5547.png">
+
+
 
 ## EstimateItem.jsx 컴포넌트 (부분)
 
@@ -1328,11 +1328,10 @@ export default EstimateItem;
 
 
 - #### 검색 전 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312868-a38a23d0-ee6e-415a-93f6-b8537388dd5f.png)
+<img width="1109" alt="견적조회 테이블" src="https://user-images.githubusercontent.com/117880554/224933103-1a73367e-606d-40a6-b43f-b770d99f5547.png">
 
 - #### 검색 후 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312945-5cc50583-9ff1-4de1-8ec9-a7351212f39f.png)
-
+<img width="1108" alt="검색 결과" src="https://user-images.githubusercontent.com/117880554/224939593-c3bfec30-0c0a-4889-bf0a-f4f2debf3ada.png">
 ## Likes.jsx 컴포넌트
 
 ※ 찜하기
@@ -1670,12 +1669,12 @@ public class DibService {
 프론트에서 보낸 값을 database에 저장해줍니다.<br><br>
 
 - #### 상품 선택 후 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
+<img width="1107" alt="검색후 클릭" src="https://user-images.githubusercontent.com/117880554/224940581-64c31841-f5d8-4a81-a4fc-fd3c1bbd744b.png">
 
 - #### 선택 상품 찜한 후 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
-
-
+<img width="1107" alt="화면 찜하기" src="https://user-images.githubusercontent.com/117880554/224940594-71d16e58-b38e-47a5-a124-929e63ddce38.png">
+- ### 계산서 축소 
+<img width="48" alt="계산서 축소 아이콘" src="https://user-images.githubusercontent.com/117880554/224941238-81895536-32f3-4709-bf0e-e6eb7967df5a.png">
 ※ 결제하기
 ```javascript
 
@@ -2344,8 +2343,7 @@ public class PaymentService {
 ```
 프론트에서 보낸 값으로 결제가 성공했다면 데이터베이스에 해당 결제 상품을 저장해 줍니다.<br><br>
 - #### 예약 버튼 클릭 후 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
-
+<img width="1105" alt="단일결제화면" src="https://user-images.githubusercontent.com/117880554/224941702-14e23193-f0d2-415d-9e01-f05f107c9cbc.png">
 <br><br>
 
 ## 2. 이벤트 팝업창
