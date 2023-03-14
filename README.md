@@ -981,7 +981,7 @@ log.info(hseoul+"이거왜안되지?");
 
 프론트에서 받아온 값을 매개변수로 받고 repository에서 쿼리문을 사용해 만든 함수 findByRsdate, findBySSlocation 등으로 데이터베이스에 일치하는 데이터를 가져온 후 데이터들을 카테고리별로 list에 담고 각 리스트들을 map에 담아서 return 합니다.<br><br>
 - #### 검색 화면<br><br>
-https://github.com/JingJing-e/ICIA-final/issues/1#issue-1622924836
+<img width="1109" alt="견적조회 테이블" src="https://user-images.githubusercontent.com/117880554/224933103-1a73367e-606d-40a6-b43f-b770d99f5547.png">
 
 ## EstimateItem.jsx 컴포넌트 (부분)
 
