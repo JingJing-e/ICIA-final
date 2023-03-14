@@ -4009,6 +4009,636 @@ export default CommuBoardWr;
 
 ## Back_BoardController
 ```java
+    // 커뮤니티 게시글 작성
+    @PostMapping("writeProc")
+    public String writeProc(@RequestPart(value = "data", required = true) Board board,
+                                          @RequestPart(value = "files", required = false) List<MultipartFile> files,
+                                          HttpSession session){
+        log.info("writeProc()");
+        board.setBmid(board.getBmid());
+        log.info("보드에 아이디 넣기");
+        log.info(board.getBtitle()+", "+board.getBview());
+        return bServ.insertBoard(board, files, session);
+    }
+    
+```
+## Back_BoardService
+```java
+    // 커뮤니티 게시글 작성
+    public String insertBoard(Board board, List<MultipartFile> files, HttpSession session){
+        log.info("insertBoard()");
+        String msg ="fail";
+        log.info("Board : " + board.toString());
+        try {
+            bRepo.save(board);
+            log.info("bno : " + board.getBno());
+
+            if (files != null){
+                log.info("files not null");
+                fileUpload(files, session, board.getBno(), board.getBtype());
+                log.info("files not null and fileUploading");
+            }else{
+                log.info("파일이 없어요");
+            }
+
+            msg = "Ok";
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return msg;
+    }
+        // 게시글 작성 파일 업로드
+    public void fileUpload(List<MultipartFile> files, HttpSession session, int bno, String btype)
+            throws Exception{
+        log.info("fileUpload()");
+        // 파일 저장 위치 지정. session을 활용
+        String realPath = session.getServletContext().getRealPath("/");
+        log.info("realPath : " + realPath);
+        // 파일 업로드용 폴더를 자동으로 생성하도록 처리
+        // 업로드용 폴더 : upload
+        realPath += "upload/";
+        File folder = new File(realPath);
+        if (folder.isDirectory() == false){ // 폴더가 없을 경우 실행
+            folder.mkdir(); // 폴더 생성 메소드
+        }
+        for (MultipartFile mf : files){
+            String orname = mf.getOriginalFilename(); // 업로드 파일명 가져오기
+            if (orname.equals("")){
+                // 업로드할 파일이 없음
+                return; // 저장처리 중지
+            }
+
+            // 파일 정보를 저장(to filetbl)
+            Files bf = new Files();
+            Board board = bRepo.findByBno(bno);
+            bf.setFid(board.getBno()); // 뮨제 생기면 여기임
+            bf.setForiname(orname);
+            String sysname = System.currentTimeMillis() +
+                    orname.substring(orname.lastIndexOf("."));
+            bf.setFsysname(sysname);
+            bf.setFtype(btype);
+
+            // 업로드하는 파일을 upload 폴더에 저장
+            File file = new File(realPath + sysname);
+
+            // 파일 저장(upload 폴더)
+            mf.transferTo(file);
+
+            // 파일 정보를 DB에 저장
+            bfRepo.save(bf);
+        }
+    }
+```
+
+#### 공지사항 작성화면 <br><br>
+![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
+
+
+## Commuboarddetail.jsx 컴포넌트
+※ 게시판 상세보기
+```javascript
+const df = date => moment(date).format('YYYY-MM-DD HH:mm:ss')
+
+const CommuBoardDetail = () => {
+
+  const decbno = sessionStorage.getItem("bno");
+  const bn = localStorage.getItem('bno')
+  const id = sessionStorage.getItem('mid')
+  const grade = sessionStorage.getItem('grade')
+
+  const nav = useNavigate()
+
+  const boardList = () => {
+    nav('/commuBoardUp')
+  }
+
+  const [board, setBoard] = useState({bno:bn});
+
+  const [flist, setFlist] = useState([
+    {
+      bno: '',
+      fnum: 0,
+      fid: 0,
+      bmid: id,
+      foriname: '',
+      fsysname: 'Nothing',
+      image: '',
+      bview: '',
+    },
+  ])
+  const [ decla, setDecla ] = useState({
+    decidx: 0,
+    dectype: '',
+    decmid: id,
+    decbmid:board.bmid,
+    decbno:decbno,
+  });
+
+  useEffect(() => {
+    console.log(bn) //게시글번호
+    axios
+      .get('/getBoard', { params: { bno: bn } })
+      .then(res => {
+        console.log(res.data)
+        localStorage.setItem('btype', res.data.btype)
+        localStorage.setItem('btitle', res.data.btitle)
+        localStorage.setItem('bstr', res.data.bstr)
+        localStorage.setItem('bmid', res.data.bmid)
+
+        setBoard(res.data)
+
+        if (res.data.bfList.length > 0) {
+          let newFileList = []
+          for (let i = 0; i < res.data.bfList.length; i++) {
+            const newFile = {
+              ...res.data.bfList[i],
+              image: 'upload/' + res.data.bfList[i].fsysname,
+            }
+            newFileList.push(newFile)
+          }
+          setFlist(newFileList)
+        }
+      })
+      .catch(err => console.log(err))
+  }, [])
+
+
+  const viewFlist = flist.map((v, i) => {
+    return (
+      <span className="Down" key={i} >
+        {v.image && <img src={v.image} alt="preview-img" style={{width:'500px'}} />}
+      </span>
+    )
+  })
+  
+  const deleteBoard = ()=>{
+    console.log(deleteBoard);
+
+    let confirm = window.confirm('삭제하시겠습니까?');
+    if(confirm === true){
+        axios
+        .get('/deleteProc', {params:{bno:bn}})
+        .then(res => {
+
+            console.log(res);
+
+            if(res.data === 'Ok'){
+                window.alert("삭제되었습니다.");
+                nav(-2);
+            } else {
+                window.alert('삭제실패하였습니다.');
+            }
+        })
+        .catch(err => window.alert(err))
+    } else{
+        window.alert('취소되었습니다.');
+    }
+}
+const [declbtn2, setDeclbtn2]= useState(false);
+const decl=() => {
+  if(id === board.bmid){
+    window.alert('본인은 신고하실 수 없습니다.');
+    return;
+  }
+  
+  if(id === '' || id === null){
+    window.alert('로그인 후, 이용가능한 서비스입니다.');
+    return;
+  }
+
+    let confirm = window.confirm('신고하시겠습니까?');
+    
+  if(confirm === true) {
+    setDecla({
+      dectype: '게시글',
+      decmid: id,
+      decbmid:board.bmid,
+      decbno:board.bno,
+    })
+    setDeclbtn2(true);  
+  } else {
+    window.alert('신고를 취소하였습니다.')
+  }
+}
+
+  useEffect(()=>{
+    
+    if(declbtn2===true){
+      axios
+      .post("/declProc" , decla)
+      .then((res) => {
+        console.log(res.data);
+
+        setDecla(res.data);
+
+        if(res.data === "Ok"){
+          window.alert('정상적으로 신고되었습니다.');
+        }else if(res.data === "Already"){
+          window.alert('이미 신고하였습니다.');
+        }
+        else{
+          window.alert('신고에 실패하였습니다.');
+        }
+      })
+      .catch((err) => console.log(err) );
+    }
+  },[declbtn2,decla])
+
+  const [comment, setComment] = useState({
+    mentstr: '',
+    mentbno: bn,
+    mentmid: id,
+  })
+  const [comList, setComList] = useState([
+    {
+      mentnum: 0,
+      mentbno: '',
+      mentdate: '',
+      mentmid: id,
+      mentstr: '',
+    }],
+  )
+
+  const com = () => {
+    console.log(comment)
+    if(id == null){
+        window.alert("로그인 후 작성 가능합니다.");
+        return;
+    }
+
+    if(comment.mentstr === "" || comment.mentstr === null){
+        window.alert("내용을 입력해주세요");
+        return;
+    } else{
+        axios
+          .post('/Bwritecomment', comment)
+          .then(res => {
+            console.log(res.data)
+    
+            const Obj = {
+              mentnum: 0,
+              mentstr: '',
+              mentbno: bn,
+              mentmid: id,
+            }
+            setComment(Obj)
+            comList.push(res.data)
+            window.alert("작성되었습니다.");
+            delwrite.current.value="";
+            console.log(res.data);
+          })
+          .catch(err => console.log(err))
+    }
+}
+const { setNotiBack, notiBack, setRecoBack, recoBack, 
+  setReviewBack, reviewBack, setShowBack, showBack, setWorryBack, worryBack } = useAuth()
+
+
+const onch = e => {
+  delwrite.current=e.target;
+  const Obj = {
+    ...comment,
+    [e.target.name]: e.target.value,
+  } 
+  setComment(Obj)
+  console.log(comment);
+}
+const move=(type)=>{
+  console.log(type);
+  switch(type){
+    case "공지사항":
+      nav("/community/commuBoardNoti");
+      break;
+      case "추천할래요":
+      nav("/community/commuBoardReco");
+      break;
+      case "고민있어요":
+      nav("/community/commuBoardWorry");
+      break;
+      case "자랑할래요":
+      nav("/community/commuBoardShow");
+      break;
+      case "업체후기톡톡":
+      nav("/community/commuBoardReview");
+      break;
+  }
+}
+const delwrite = useRef();
+  return (
+    <div>
+      <Header />
+      <EstimateBanner text="community" />
+      <Section title="">
+        <div className="Main">
+          <form className="Content_table">
+            <div style={{ marginTop: '50px', marginBottom: '30px' }}>
+              <input className="Input inputTitle" readOnly value={board.btitle}></input>
+              <div className="divBoard divBdInfo">
+                <div>
+                  <span>NO.&emsp;{board.bno}</span>
+                </div>
+                <span>작성자&emsp;{board.bmid}</span>
+                <span>작성일&emsp;{df(board.bdate)}</span>
+                <span>조회수&emsp;{board.bview}&emsp;</span>
+              </div>
+              <div className="Box">
+                <div style={{marginTop:'30px'}} className="FileData">{viewFlist}</div>
+              </div>
+              <textarea style={{border:'none', height:'500px'}}
+                onScroll readOnly className="Textarea TextStr" placeholder="내용" value={board.bstr} >
+              </textarea>
+              
+            </div>
+           
+            <div className="divbtn" style={{  display:'flex'}}>
+               {id===""||id===undefined||id===null ? null: board.bmid !== id || grade === "admin" ? (
+              <Button type='button' onClick={()=>decl()} style={{ opacity:'90%', background:'#E63535', borderRadius:'100px', width: '120px', height: '50px' }}>🚨 신고하기</Button> 
+              ): <div />}
+              <div>{board.bmid === id || grade === "admin" ? (
+                <Button type="button" onClick={boardList} 
+                style={{ width: '120px', height: '50px',background:'#C9A3B6' ,borderRadius:'10px', marginRight:'10px'}}>글수정</Button> ) : null}
+                {board.bmid === id || grade ==="admin" ? (
+                <Button type="button" onClick={()=>{deleteBoard(); move(board.btype)}} style={{ width: '120px', height: '50px', background: 'lightgray',borderRadius:'10px' }}>
+                    삭제하기</Button>): null}
+              </div>
+            </div>
+            <div
+              style={{ display: 'flex', justifyContent: 'center', lineHeight:'50px',width: '100%', marginTop: '30px'}}>
+              <Button type="button" onClick={() => move(board.btype)} style={{ width: '120px', height: '50px', background:'#C9A3B6' ,borderRadius:'10px' }}>
+                목록
+              </Button>
+            </div>
+          </form>
+          <form className="">
+            <div style={{ marginTop: '50px', display: 'flex', marginLeft:'50px', }}>
+              <input className="inputdiv inputWrBtn" ref={delwrite} placeholder="댓글을 입력하세요." name="mentstr"
+                 onChange={onch}></input>
+                <Button className='wtBtn' type="button" onClick={com} 
+                style={{   width: '150px', height: '90px', background:'#C9A3B6', borderTopRightRadius:'15px', borderBottomRightRadius:'15px',}}>
+                작성하기
+                </Button>
+          </div>
+          </form>
+      </div>
+        <DetailReple comment={comment} setComment={setComment} comList={comList} setComList={setComList}/>
+      </Section>
+      <Footer />
+    </div>
+  )
+}
+export default CommuBoardDetail
+```
+게시글 화면에서 글 제목을 클릭했을 때 이동되는 상세페이지 컴포넌트입니다. 클릭한 글의 번호를 localStorage에 저장 후 해당하는 글의 상세페이지로 이동합니다. 상세 페이지에서는 댓글달기, 글 수정하기(작성자와 관리자만), 글 삭제하기(작성자와 관리자만), 글 신고하기를 할 수 있습니다.
+
+## Back_BoardController
+```java
+    @GetMapping("getBoard")
+    public Board getBoard(@RequestParam int bno){
+        log.info("getBoard() bno:" + bno);
+        Board board = bServ.getBoard(bno);
+        log.info(board.toString());
+        return board;
+    }
+```
+## Back_BoardService
+```java
+    public Board getBoard(int bno){
+        log.info("getBoard()");
+        Board board = new Board();
+        try{
+            // 게시글 담기
+            board = bRepo.findByBno(bno);
+            board = bRepo.findById(bno).get();
+            int view = board.getBview();
+            board.setBview(view +1);
+            bRepo.save(board);
+
+            log.info("board collecting");
+        }catch (Exception e){
+            log.info("board Collecting Fail");
+            e.printStackTrace();
+    }
+```
+
+#### 공지사항 출력 화면 <br><br>
+![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
+
+
+## CommuBoardWr.jsx 컴포넌트
+※ 게시판 작성
+```javascript
+const CommuBoardWr = () => {
+// const CommuBoardWr = ({handleList}) => {
+    const nav = useNavigate();
+    
+  // const titleRef = useRef();
+  // const contetnRef = useRef();
+  const [fileImage, setFileImage] = useState('')
+
+  const id = sessionStorage.getItem("mid");
+  const grade = sessionStorage.getItem("grade");
+  const cb = sessionStorage.getItem("cb");
+  console.log(cb);
+  const [data, setData] = useState({
+    btype: cb,
+    btitle: "",
+    bmid: id,
+    bstr: "",
+    bview: "",
+  });
+
+  useEffect(()=>{
+    console.log(data);
+  },[data])
+  const inputBoard = useRef();
+  const borderCh = (e) => {
+    inputBoard.current.style.border = '1px solid lightgray';
+    inputBoard.current.style.background = 'white';
+    inputBoard.current = e.target
+    inputBoard.current.style.border = '1px solid black';
+    inputBoard.current.style.background = 'rgb(248,248,248)';
+  
+  }
+  //전송 데이터와 파일을 담을 멀티파트 폼 생성
+  let formData = new FormData();
+  // const { btitle, bstr, btype,  } = data;
+
+  //작성한 내용(글, 파일들) 전송 함수
+  const onWrite = useCallback(
+    (e) => {
+      e.preventDefault();
+      //console.log(data);
+      //전송 시 파일 이외의 데이터를 폼데이터에 추가
+      formData.append(
+        "data",
+        new Blob([JSON.stringify(data)], { type: "application/json" })
+      );
+
+      axios
+        .post("/writeProc", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((res) => {
+          if (res.data === "Ok") {
+            alert("작성 성공");
+            sessionStorage.removeItem("pageNum");
+            nav(-1);
+          } else {
+            alert("작성 실패");
+            //formData = new FormData();
+          }
+        })
+        .catch((error) => console.log(error));
+    },
+    [data]
+  );
+  const onChange = useCallback(
+    (e) => {
+      const dataObj = {
+        ...data,
+        [e.target.name]: e.target.value,
+        bmid:id,
+      };
+      console.log(dataObj);
+      setData(dataObj);
+    },
+    [data]
+  );
+  //console.log(data);
+  //파일 선택 시 폼데이터에 파일 목록 추가(다중파일)
+  const onFileChange = useCallback(
+    (e) => {
+      const files = e.target.files;
+      console.log(files);
+      for (let i = 0; i < files.length; i++) {
+        setFileImage(URL.createObjectURL(e.target.files[0]))
+        formData.append("files", files[i]);
+      }
+    },
+    [formData]
+  );
+    const imageInput = useRef();
+    const onClickImg = () => {
+        imageInput.current.click();
+    }
+    
+  const options = [
+    {
+      defaultLabel: '공지사항',
+      value : '공지사항',
+      label :'공지사항'
+    },
+    {
+      defaultLabel: '추천할래요',
+      value : '추천할래요',
+      label :'추천할래요'
+    },
+    
+    {
+      defaultLabel: '고민있어요',
+      value : '고민있어요',
+      label :'고민있어요'
+    },
+    {
+      defaultLabel: '자랑할래요',
+      value : '자랑할래요',
+      label :'자랑할래요'
+    },
+    {
+    defaultLabel: '업체후기톡톡',
+    value : '업체후기톡톡',
+    label :'업체후기톡톡'
+  },
+  ]
+  const options1 = [
+    // {
+    //     defaultLabel: 1,
+    //     value : 1,
+    //     label :'공지사항'
+    // },
+  {
+    defaultLabel: '추천할래요',
+    value : '추천할래요',
+    label :'추천할래요'
+  },
+  
+  {
+    defaultLabel: '고민있어요',
+    value : '고민있어요',
+    label :'고민있어요'
+  },
+  {
+    defaultLabel: '자랑할래요',
+    value : '자랑할래요',
+    label :'자랑할래요'
+  },
+  {
+    defaultLabel: '업체후기톡톡',
+    value : '업체후기톡톡',
+    label :'업체후기톡톡'
+    },
+  ]
+    return(
+        <div>
+            <Header />
+        <div className="Main">
+            <form className="Content" onSubmit={onWrite}>
+                {/*  onSubmit={onWrite} */}
+                {/* <h1>글쓰기</h1><br /> */}
+               
+                <div style={{marginTop:"50px", marginBottom:"30px"}}>
+                   {grade === 'admin' ?(
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    name="btype" onChange={onChange}>
+                      {options.map((item)=>(
+                        <option value={item.value} onChange={onChange}>{item.label}</option>
+                      ))}
+                    </Sel>):(
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    name="btype" onChange={onChange}>
+                      {options1.map((item)=>(
+                        <option value={item.value} onChange={onChange}>{item.label}</option>
+                      ))}
+                    </Sel>)}
+                    <input style={{width:"900px", height:"50px", borderBottom:'none'}}
+                    className="Input" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="제목을 입력하세요." autoFocus required 
+                      name="btitle" value={data.btitle} onChange={onChange}
+                    />
+                    <textarea style={{width: "1050px", height:"500px",}} onScroll 
+                    className="Textarea" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="게시글을 작성하세요."
+                      name="bstr" onChange={onChange} value={data.bstr} 
+                    ></textarea>
+                    <div>
+                      {fileImage && (
+                        <div>
+                          <img alt="image" src={fileImage} style={{ width: '350px', height: '350px' }} />
+                        </div>
+                      )}
+                    </div>
+                    <input type="file" name = "files" multiple className="Input" accept="image/*" ref={imageInput} onChange={onFileChange}
+                    style={{ display:'none',
+                        width:"1000px", height:"50px", fontSize:"1rem", marginTop:"-10px", paddingLeft:"10px"
+                    }} />
+                    <button style={{width: '120px', height: '50px', background:'#C3B6D9',border:'1px solid #D6C7ED', color:'',borderRadius:'10px'}} type="button" className="filebtn" onClick={onClickImg}>첨부하기</button>
+                </div>
+                <div className="Buttons">
+                    <Button  wsize="s-30" style={{marginRight:"10px",width: '120px', height: '50px', background:'#C9A3B6',borderRadius:'10px'}}>
+                        작성하기
+                    </Button>
+                    <Button type="button" wsize="s-10" color="gray" outline onClick={() => nav(-1)}
+                    style={{width: '120px', height: '50px', backgroundColor:"lightgray",borderRadius:'10px'}}>취소하기</Button>
+                </div>
+            </form>
+        </div>
+        <Footer />
+        </div>
+    );
+}
+export default CommuBoardWr;
+```
+
+## Back_BoardController
+```java
     // 커뮤니티 리스트
     @GetMapping("list")
     public Map<String, Object> getList(@RequestParam Integer pageNum,String type ,HttpSession session){
@@ -4048,10 +4678,6 @@ export default CommuBoardWr;
 
 #### 공지사항 작성화면 <br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
-
-
-
-
 
 
 
@@ -4457,13 +5083,13 @@ export default JoinModal;
 ```
 react-simple-chatbot 라이브러리를 이용해 자주 묻는 질문은 챗봇을 통해 대답하고 그 외의 질문은 버튼을 통해 상담문의게시판으로 이동하게 만들었습니다.
 
-#### 챗봇_1<br><br>
+#### 회원가입 화면<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215295149-b59b4a7e-ca2f-4b0c-a3c2-6efb53d0f263.png)
 
-#### 챗봇_2<br><br>
+#### 카카오 주소 api<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215295157-d921bf64-3243-4aed-a013-bad28517331d.png)
 
-#### 챗봇_3<br><br>
+#### 아임포트 핸드폰 인증 api<br><br>
 ![image](https://user-images.githubusercontent.com/117874997/215295169-277858a8-70ee-46d1-ab66-3d6bf59d78ec.png)
 
 마치며
