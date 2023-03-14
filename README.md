@@ -2467,7 +2467,7 @@ export default () => {
 ```
 
 - #### 메인 페이지 화면<br>
-![image](https://user-images.githubusercontent.com/117874997/215312918-93be6fff-b1b2-44e2-a83d-9591549cf2e6.png)
+<img width="1106" alt="팝업창" src="https://user-images.githubusercontent.com/117880554/224937495-2a248b86-fe4c-4efc-8c37-d640e9fe6513.png">
 페이지에 들어가자마자 팝업창을 띄워줍니다. '오늘 하루 보지 않기' 버튼을 클릭했을때 쿠키를 사용해서 더 이상 팝업창이 뜨지 않도록 설정해주었습니다.
 
 
