@@ -3165,7 +3165,6 @@ export default PageCorrection;
 
 #### 결제 모듈<br><br>
 <img width="409" alt="합산 결제" src="https://user-images.githubusercontent.com/117880554/224946697-bf39d550-00c0-4734-9c0c-6b6a10c6e4e9.png">
-188.png">
 
 ## Reservation.jsx(마이페이지 예약 확인)
 ```javascript
@@ -3639,7 +3638,6 @@ export default CommuMain
 
 #### 전체 게시판 화면<br><br>
 <img width="1106" alt="전체 게시판" src="https://user-images.githubusercontent.com/117880554/224947728-9a356b61-9d17-41cf-8991-f4a46b1bac2b.png">
--bd67-e6a0a1005af3.png">
 
 ## Back_BoardController
 ```java
@@ -4115,9 +4113,6 @@ export default CommuBoardWr;
         }
     }
 ```
-
-#### 공지사항 작성화면 <br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
 
 
 ## Commuboardetail.jsx 컴포넌트
