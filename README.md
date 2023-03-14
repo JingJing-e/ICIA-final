@@ -1671,6 +1671,7 @@ public class DibService {
 
 - #### 선택 상품 찜한 후 화면<br><br>
 <img width="1107" alt="화면 찜하기" src="https://user-images.githubusercontent.com/117880554/224940594-71d16e58-b38e-47a5-a124-929e63ddce38.png">
+
 - #### 계산서를 닫았을 때 우측 하단 아이콘<br><br>
 <img width="48" alt="계산서 축소 아이콘" src="https://user-images.githubusercontent.com/117880554/224941238-81895536-32f3-4709-bf0e-e6eb7967df5a.png">
 ※ 결제하기
@@ -2465,8 +2466,11 @@ export default () => {
 
 - #### 메인 페이지 화면<br>
 <img width="1106" alt="팝업창" src="https://user-images.githubusercontent.com/117880554/224937495-2a248b86-fe4c-4efc-8c37-d640e9fe6513.png">
-페이지에 들어가자마자 팝업창을 띄워줍니다. '오늘 하루 보지 않기' 버튼을 클릭했을때 쿠키를 사용해서 더 이상 팝업창이 뜨지 않도록 설정해주었습니다.
 
+- #### 오늘 하루 보지 않기 클릭 후 쿠키 기록<br>
+<img width="785" alt="쿠키" src="https://user-images.githubusercontent.com/117880554/224944468-6c31f862-02b0-403c-9862-addfc26847cf.png">
+
+페이지에 들어가자마자 팝업창을 띄워줍니다. '오늘 하루 보지 않기' 버튼을 클릭했을때 쿠키를 사용해서 더 이상 팝업창이 뜨지 않도록 설정해주었습니다.
 
 ## 마이페이지
 
@@ -2556,7 +2560,14 @@ const Mypage = () => {
 }
 export default Mypage;
 ```
+
+- #### 마이페이지<br>
+<img width="1107" alt="내 정보" src="https://user-images.githubusercontent.com/117880554/224944992-51f8dda4-293b-4b80-87ff-4a35cf64849e.png">
+
 로그인을 한 후에 페이지 우측 상단의 '마이페이지' 버튼을 누르면 보이는 기본 마이페이지로 회원정보를 확인할 수 있고, '수정하기' 버튼 클릭 시 회원정보 수정 카테고리로 이동되며, '탈퇴하기' 버튼 클릭 시 회원 알림창으로 다시 한번 확인 후 회원 정보를 삭제합니다.
+
+
+
 
 ## Back_MemberController
 ```java
@@ -2623,8 +2634,6 @@ export default Mypage;
     
 ```
 프론트에서 넘어온 id 값을 통해 해당 유저의 정보들을 findby~를 사용하여 데이터베이스에서 찾아서 return 해줍니다.<br><br>
-#### 내 정보 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215292380-30bab833-913b-45cc-8107-675322ae2ab0.png)
 
 ## 내 정보 수정
 
@@ -2805,6 +2814,13 @@ const closePostCode = (v) => {
 }
 export default PageCorrection;
 ```
+
+#### 내 정보 수정 화면<br><br>
+<img width="1106" alt="정보 수정" src="https://user-images.githubusercontent.com/117880554/224945597-64e61998-427c-4cd2-8023-6e8c52715443.png">
+
+#### 주소 api<br><br>
+<img width="885" alt="주소 api" src="https://user-images.githubusercontent.com/117880554/224945831-6a3cf8bd-da33-4c87-9c87-c9d1cf70133d.png">
+
 마이페이지 화면에서 '내 정보 수정' 버튼을 클릭했을 때 이동되는 컴포넌트입니다. Session에 저장돼 있는 로그인 아이디를 사용하여 유저의 이름, 비밀번호, 이메일, 연락처, 주소를 변경 할 수 있습니다. 주소 변경에서는 카카오 주소 api를 활용 했습니다.
 
 ## Back_MemberController 
@@ -2860,6 +2876,7 @@ export default PageCorrection;
 ```
 
 ## Likes.jsx(마이페이지 찜목록) 
+
 ```javascript
     export default () => {
       const comma = (num) =>[num].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -3144,9 +3161,11 @@ export default PageCorrection;
 체크박스를 사용하여 체크된 상품들만 input태그의 disabled를 풀어주고 해당 상품에 필요한 옵션을 작성할 수 있고, 작성하지 않고 '결제하기' 버튼을 클릭 시 작성해달라는 경고창이 나타납니다. 체크한 상품들의 가격이 우측에 나오고, 옵션 작성으로 인한 가격 변동은 실시간으로 반영됩니다. 여러 상품을 선택하고 '결제하기'버튼을 클릭 시 결제 모듈이 나타나며 첫번째 상품의 이름과 함께 'xxx외 x건'으로 몇 건의 상품을 결제하는지가 모듈에 상품명으로 등록되어있고, 가격은 총 합산 가격으로 결제가 진행됩니다. 백은 결제에서 사용한 함수를 그대로 사용하였습니다.
 
 #### 찜목록 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
+<img width="1106" alt="찜목록" src="https://user-images.githubusercontent.com/117880554/224946446-3ba0d44d-01af-4e5d-a1f3-752989a22188.png">
+
 #### 결제 모듈<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
+<img width="409" alt="합산 결제" src="https://user-images.githubusercontent.com/117880554/224946697-bf39d550-00c0-4734-9c0c-6b6a10c6e4e9.png">
+188.png">
 
 ## Reservation.jsx(마이페이지 예약 확인)
 ```javascript
@@ -3324,7 +3343,8 @@ export default PageCorrection;
 결제가 완료된 상품들이 정렬되어 나타나고 해당 상품들의 정보와 진행상황이 나타납니다. '환불하기' 버튼 클릭 시 확인 경고창이 나타나고 환불 진행 시 실제로 환불처리가 되며 진행상황이 '환불완료'로 바뀌게 됩니다. 환불완료된 상품의 '환불하기' 버튼 클릭 시 이미 환불된 건이라는 알림창이 나타납니다. 백은 결제에서 사용한 함수를 그대로 사용하였습니다.
 
 #### 예약확인 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215292806-d22fa74f-871a-4cc9-8768-c35f1e763052.png)
+<img width="858" alt="예약확인" src="https://user-images.githubusercontent.com/117880554/224947323-f9e978bd-9b1d-4b57-bd67-e6a0a1005af3.png">
+
 
 ## CommuMain.jsx 컴포넌트
 ※ 전체 게시판
@@ -3617,6 +3637,10 @@ export default CommuMain
 ```
 모든 게시판의 글들이 카테고리별로 출력되며 출력순서는 조회수 기준으로 카테고리별로 3개의 글까지 출력됩니다.
 
+#### 전체 게시판 화면<br><br>
+<img width="1106" alt="전체 게시판" src="https://user-images.githubusercontent.com/117880554/224947728-9a356b61-9d17-41cf-8991-f4a46b1bac2b.png">
+-bd67-e6a0a1005af3.png">
+
 ## Back_BoardController
 ```java
     // 커뮤니티 인기글
@@ -3647,11 +3671,10 @@ export default CommuMain
 ```
 Sort함수를 사용해 게시글을 조회수 기준으로 정렬시켰습니다.
 
-#### 전체 게시판 출력 화면<br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294422-d28516c6-9b0a-4463-907f-43b5bda73d82.png)
-
 ## CommuboardNoti.jsx 컴포넌트
+
 ※ 게시판(형식이 모두 같아서 공지사항 게시판으로 정리했습니다)
+
 ```javascript
     const CommuBoardNoti = () => {
   const { setNotiback } = useAuth();
@@ -3748,6 +3771,12 @@ export default CommuBoardNoti
 ```
 공지사항 게시판이 처음 열렸을 때 데이터베이스에서 type이 "공지사항"인 데이터만 가져옵니다. 일반회원과 관리자의 권한을 나누어서 관리자만 글을 작성할 수 있고, 관리자는 글쓰기 버튼이 있지만, 일반회원은 공지사항 게시판에 들어가면 글쓰기 버튼이 나타나지 않습니다.
 
+#### 일반회원 게시판 화면<br><br>
+<img width="1105" alt="공지사항 게시판" src="https://user-images.githubusercontent.com/117880554/224948518-1506e506-9872-4d4c-81d5-86d7cd9e1295.png">
+
+#### 관리자 게시판 화면<br><br>
+<img width="1106" alt="관리자 공지사항" src="https://user-images.githubusercontent.com/117880554/224949756-58adc48b-8ad3-4815-9eb7-6c8762e23504.png">
+
 ## Back_BoardController
 ```java
     // 커뮤니티 리스트
@@ -3786,10 +3815,6 @@ export default CommuBoardNoti
         return res;
     }
 ```
-
-#### 공지사항 출력 화면 <br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
-
 
 ## CommuBoardWr.jsx 컴포넌트
 ※ 게시판 작성
@@ -4003,6 +4028,10 @@ const CommuBoardWr = () => {
 }
 export default CommuBoardWr;
 ```
+
+#### 글 작성 화면<br><br>
+<img width="1103" alt="게시글 작성" src="https://user-images.githubusercontent.com/117880554/224950287-f0615474-065a-415c-8ca0-31261a52faa5.png">
+
 
 ## Back_BoardController
 ```java
@@ -4387,6 +4416,9 @@ export default CommuBoardDetail
 ```
 게시글 화면에서 글 제목을 클릭했을 때 이동되는 상세페이지 컴포넌트입니다. 클릭한 글의 번호를 localStorage에 저장 후 해당하는 글의 상세페이지로 이동합니다. 상세 페이지에서는 댓글달기, 글 수정하기(작성자와 관리자만), 글 삭제하기(작성자와 관리자만), 글 신고하기를 할 수 있습니다.
 
+#### 공지사항 상세보기 출력 화면 <br><br>
+<img width="436" alt="게시글 디테일" src="https://user-images.githubusercontent.com/117880554/224950994-0ce411ee-6c73-4a31-8aa8-b3b3feea558f.png">
+
 ## Back_BoardController
 ```java
     @GetMapping("getBoard")
@@ -4417,48 +4449,46 @@ export default CommuBoardDetail
     }
 ```
 
-#### 공지사항 출력 화면 <br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
 
-
-## CommuBoardWr.jsx 컴포넌트
+## CommuBoardUp.jsx 컴포넌트
 ※ 게시판 작성
 ```javascript
-const CommuBoardWr = () => {
+const CommuBoardUp = () => {
 // const CommuBoardWr = ({handleList}) => {
     const nav = useNavigate();
     
   // const titleRef = useRef();
   // const contetnRef = useRef();
-  const [fileImage, setFileImage] = useState('')
 
-  const id = sessionStorage.getItem("mid");
+//   const da = localStorage.getItem("bdate");
+  const bti = localStorage.getItem("btitle");
   const grade = sessionStorage.getItem("grade");
+  const bs = localStorage.getItem("bstr");
   const cb = sessionStorage.getItem("cb");
-  console.log(cb);
-  const [data, setData] = useState({
-    btype: cb,
-    btitle: "",
-    bmid: id,
-    bstr: "",
-    bview: "",
-  });
 
-  useEffect(()=>{
-    console.log(data);
-  },[data])
+  const [data, setData] = useState({
+    // bno:bno,
+    btype:cb,
+    // bdate: da,
+    btitle: bti,
+    bstr: bs,
+  });
+  const bn = localStorage.getItem("bno");
+
   const inputBoard = useRef();
-  const borderCh = (e) => {
-    inputBoard.current.style.border = '1px solid lightgray';
-    inputBoard.current.style.background = 'white';
-    inputBoard.current = e.target
-    inputBoard.current.style.border = '1px solid black';
-    inputBoard.current.style.background = 'rgb(248,248,248)';
-  
-  }
+const borderCh = (e) => {
+  inputBoard.current.style.border = '1px solid lightgray';
+  inputBoard.current.style.background = 'white';
+  inputBoard.current = e.target
+  inputBoard.current.style.border = '1px solid black';
+  inputBoard.current.style.background = 'rgb(248,248,248)';
+
+}
+
+
   //전송 데이터와 파일을 담을 멀티파트 폼 생성
   let formData = new FormData();
-  // const { btitle, bstr, btype,  } = data;
+  // const { btitle, bstr, btype } = data;
 
   //작성한 내용(글, 파일들) 전송 함수
   const onWrite = useCallback(
@@ -4472,16 +4502,16 @@ const CommuBoardWr = () => {
       );
 
       axios
-        .post("/writeProc", formData, {
+        .post("/updateProc", formData, {params:{bno:bn}}, {
           headers: { "Content-Type": "multipart/form-data" },
         })
         .then((res) => {
           if (res.data === "Ok") {
-            alert("작성 성공");
+            alert("수정 성공");
             sessionStorage.removeItem("pageNum");
             nav(-1);
           } else {
-            alert("작성 실패");
+            alert("수정 실패");
             //formData = new FormData();
           }
         })
@@ -4494,10 +4524,10 @@ const CommuBoardWr = () => {
       const dataObj = {
         ...data,
         [e.target.name]: e.target.value,
-        bmid:id,
       };
-      console.log(dataObj);
+      //console.log(dataObj);
       setData(dataObj);
+      console.log(dataObj);
     },
     [data]
   );
@@ -4506,9 +4536,8 @@ const CommuBoardWr = () => {
   const onFileChange = useCallback(
     (e) => {
       const files = e.target.files;
-      console.log(files);
+      //console.log(files);
       for (let i = 0; i < files.length; i++) {
-        setFileImage(URL.createObjectURL(e.target.files[0]))
         formData.append("files", files[i]);
       }
     },
@@ -4519,12 +4548,40 @@ const CommuBoardWr = () => {
         imageInput.current.click();
     }
     
-  const options = [
-    {
-      defaultLabel: '공지사항',
-      value : '공지사항',
-      label :'공지사항'
-    },
+    const options = [
+      {
+          defaultLabel: '공지사항',
+          value : '공지사항',
+          label :'공지사항'
+      },
+      {
+        defaultLabel: '추천할래요',
+        value : '추천할래요',
+        label :'추천할래요'
+      },
+      
+      {
+        defaultLabel: '고민있어요',
+        value : '고민있어요',
+        label :'고민있어요'
+      },
+      {
+        defaultLabel: '자랑할래요',
+        value : '자랑할래요',
+        label :'자랑할래요'
+      },
+      {
+        defaultLabel: '업체후기톡톡',
+        value : '업체후기톡톡',
+        label :'업체후기톡톡'
+        },
+    ]
+    const options1 = [
+      // {
+      //     defaultLabel: 1,
+      //     value : 1,
+      //     label :'공지사항'
+      // },
     {
       defaultLabel: '추천할래요',
       value : '추천할래요',
@@ -4542,39 +4599,11 @@ const CommuBoardWr = () => {
       label :'자랑할래요'
     },
     {
-    defaultLabel: '업체후기톡톡',
-    value : '업체후기톡톡',
-    label :'업체후기톡톡'
-  },
-  ]
-  const options1 = [
-    // {
-    //     defaultLabel: 1,
-    //     value : 1,
-    //     label :'공지사항'
-    // },
-  {
-    defaultLabel: '추천할래요',
-    value : '추천할래요',
-    label :'추천할래요'
-  },
-  
-  {
-    defaultLabel: '고민있어요',
-    value : '고민있어요',
-    label :'고민있어요'
-  },
-  {
-    defaultLabel: '자랑할래요',
-    value : '자랑할래요',
-    label :'자랑할래요'
-  },
-  {
-    defaultLabel: '업체후기톡톡',
-    value : '업체후기톡톡',
-    label :'업체후기톡톡'
-    },
-  ]
+      defaultLabel: '업체후기톡톡',
+      value : '업체후기톡톡',
+      label :'업체후기톡톡'
+      },
+    ]
     return(
         <div>
             <Header />
@@ -4582,45 +4611,38 @@ const CommuBoardWr = () => {
             <form className="Content" onSubmit={onWrite}>
                 {/*  onSubmit={onWrite} */}
                 {/* <h1>글쓰기</h1><br /> */}
-               
                 <div style={{marginTop:"50px", marginBottom:"30px"}}>
                    {grade === 'admin' ?(
-                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'11px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
                     name="btype" onChange={onChange}>
                       {options.map((item)=>(
                         <option value={item.value} onChange={onChange}>{item.label}</option>
                       ))}
                     </Sel>):(
-                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'12px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
+                    <Sel defaultValue={data.btype} style={{width: "150px", height:"51px",paddingTop:'11px',paddingLeft:'20px', border:'1px solid lightgray', borderBottom:'none'}}
                     name="btype" onChange={onChange}>
                       {options1.map((item)=>(
                         <option value={item.value} onChange={onChange}>{item.label}</option>
                       ))}
                     </Sel>)}
                     <input style={{width:"900px", height:"50px", borderBottom:'none'}}
-                    className="Input" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="제목을 입력하세요." autoFocus required 
+                    className="Input" ref={inputBoard} onClick={(e)=>borderCh(e)} placeholder="제목을 입력하세요." autoFocus required 
                       name="btitle" value={data.btitle} onChange={onChange}
                     />
                     <textarea style={{width: "1050px", height:"500px",}} onScroll 
-                    className="Textarea" ref={inputBoard} onClick={(e)=>borderCh(e)}  placeholder="게시글을 작성하세요."
+                    className="Textarea" ref={inputBoard} onClick={(e)=>borderCh(e)} placeholder="게시글을 작성하세요."
                       name="bstr" onChange={onChange} value={data.bstr} 
                     ></textarea>
-                    <div>
-                      {fileImage && (
-                        <div>
-                          <img alt="image" src={fileImage} style={{ width: '350px', height: '350px' }} />
-                        </div>
-                      )}
-                    </div>
-                    <input type="file" name = "files" multiple className="Input" accept="image/*" ref={imageInput} onChange={onFileChange}
-                    style={{ display:'none',
+                    {/* <input className="Input" type="file" name="files" onChange={onFileChange} multiple /> */}
+                    <input type="file" name = "files" multiple className="Input" ref={imageInput} onChange={onFileChange}
+                    style={{ display:"none",
                         width:"1000px", height:"50px", fontSize:"1rem", marginTop:"-10px", paddingLeft:"10px"
                     }} />
                     <button style={{width: '120px', height: '50px', background:'#C3B6D9',border:'1px solid #D6C7ED', color:'',borderRadius:'10px'}} type="button" className="filebtn" onClick={onClickImg}>첨부하기</button>
                 </div>
                 <div className="Buttons">
-                    <Button  wsize="s-30" style={{marginRight:"10px",width: '120px', height: '50px', background:'#C9A3B6',borderRadius:'10px'}}>
-                        작성하기
+                    <Button wsize="s-30" style={{marginRight:"10px",width: '120px', height: '50px', background:'#C9A3B6',borderRadius:'10px'}}>
+                        수정하기
                     </Button>
                     <Button type="button" wsize="s-10" color="gray" outline onClick={() => nav(-1)}
                     style={{width: '120px', height: '50px', backgroundColor:"lightgray",borderRadius:'10px'}}>취소하기</Button>
@@ -4631,50 +4653,54 @@ const CommuBoardWr = () => {
         </div>
     );
 }
-export default CommuBoardWr;
+export default CommuBoardUp;
 ```
+
+#### 공지사항 수정 화면 <br><br>
+<img width="539" alt="게시판 수정" src="https://user-images.githubusercontent.com/117880554/224952302-ba84e866-8c8f-44c4-b58d-9a72b0969403.png">
 
 ## Back_BoardController
 ```java
-    // 커뮤니티 리스트
-    @GetMapping("list")
-    public Map<String, Object> getList(@RequestParam Integer pageNum,String type ,HttpSession session){
-        log.info("getList()");
-        log.info(""+type);
-        return bServ.getBoardList(type, pageNum);
+    // 게시글 수정 페이지로 전환
+    @PostMapping("updateProc")
+    public String updateProc(@RequestPart(value = "files", required = false) List<MultipartFile> files,  HttpSession session,
+                             int bno, @RequestPart(value = "data", required = true) Board board){
+        log.info("updateProc()");
+        log.info("글번호 : "+bno);
+        log.info("제목 : " + board.getBtitle());
+        String msg = bServ.boardUpdate(files, session, bno, board);
+        return msg;
     }
 ```
 ## Back_BoardService
 ```java
-    //커뮤니티 게시글 리스트
-    public Map<String, Object> getBoardList(String type,Integer pageNum){
-        log.info("getBoardList()");
-
-        if (pageNum == null){ // 처음에 접속할때 pageNum 못넘어오게
-            pageNum = 1;
+    // 커뮤니티 게시글 수정
+    @Transactional
+    public String boardUpdate(List<MultipartFile> files, HttpSession session, int bno, Board board) {
+        log.info("boardUpdate()");
+        String msg = null;
+        try {
+            Board bData = bRepo.findByBno(bno);
+            bData.setBtitle(board.getBtitle());
+            bData.setBstr(board.getBstr());
+            bData.setBtype(board.getBtype());
+            bRepo.save(bData);
+//            bRepo.findByBno(board.getBno());
+            if (files != null){
+                log.info("files not null");
+                fileUpload(files, session, bno, board.getBtype());
+                log.info("files not null and fileUploading");
+            }else{
+                log.info("파일이 없어요");
+            }
+            msg = "Ok";
+        } catch (Exception e) {
+            e.printStackTrace();
+            msg = "수정 실패";
         }
-        int listCnt = 10; // 페이지당 보여질 게시글 갯수
-
-        // 페이징 조건 생성
-        Pageable pb = PageRequest.of((pageNum - 1), listCnt,
-                Sort.Direction.DESC, "bno");
-
-        Page<Board> result = bRepo.findByBtype(type, pb);
-        List<Board> bList = result.getContent();
-        int totalPage = result.getTotalPages();
-
-        Map<String, Object> res = new HashMap<>();
-        res.put("totalPage", totalPage);
-        res.put("pageNum", pageNum);
-        res.put("bList", bList);
-        log.info(""+result.getContent());
-
-        return res;
+        return msg;
     }
 ```
-
-#### 공지사항 작성화면 <br><br>
-![image](https://user-images.githubusercontent.com/117874997/215294135-269530f1-ad47-4c9e-bc89-856738f66daf.png)
 
 
 
